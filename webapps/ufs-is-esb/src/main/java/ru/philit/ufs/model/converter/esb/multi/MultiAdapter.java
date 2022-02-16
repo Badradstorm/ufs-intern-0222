@@ -1,5 +1,6 @@
 package ru.philit.ufs.model.converter.esb.multi;
 
+import ru.philit.ufs.model.converter.esb.asfs.WorkPlaceAdapter;
 import ru.philit.ufs.model.converter.esb.eks.AccountAdapter;
 import ru.philit.ufs.model.converter.esb.eks.CheckFraudAdapter;
 import ru.philit.ufs.model.converter.esb.eks.CommissionAdapter;
@@ -14,6 +15,11 @@ import ru.philit.ufs.model.converter.esb.pprb.OperationTypeAdapter;
 import ru.philit.ufs.model.converter.esb.pprb.OperatorAdapter;
 import ru.philit.ufs.model.converter.esb.pprb.RepresentativeAdapter;
 import ru.philit.ufs.model.entity.common.ExternalEntity;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetWorkPlaceInfoRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs;
 import ru.philit.ufs.model.entity.esb.eks.SrvAccountByCardNumRs;
 import ru.philit.ufs.model.entity.esb.eks.SrvAccountByIdRs;
 import ru.philit.ufs.model.entity.esb.eks.SrvAccountResiduesByIdRs;
@@ -129,6 +135,26 @@ public class MultiAdapter {
 
     } else if (source instanceof SrvCashSymbolsListRs) {
       return CashSymbolAdapter.convert((SrvCashSymbolsListRs) source);
+    }
+//
+//    else if (source instanceof SrvUpdStCashOrderRs) {
+//      return CashOrderAdapter.convert((SrvUpdStCashOrderRs) source);
+//    }
+//
+//    else if (source instanceof SrvGetCashOrderRs) {
+//      return CashOrderAdapter.convert((SrvGetCashOrderRs) source);
+//    }
+//
+//    else if (source instanceof SrvCreateCashOrderRs) {
+//      return CashOrderAdapter.convert((SrvCreateCashOrderRs) source);
+//    }
+//
+//    else if (source instanceof SrvCheckOverLimitRs) {
+//      return CheckOverLimitAdapter.convert((SrvCheckOverLimitRs) source);
+//    }
+
+    else if (source instanceof SrvGetWorkPlaceInfoRs) {
+      return WorkPlaceAdapter.convert((SrvGetWorkPlaceInfoRs) source);
     }
 
     return null;
