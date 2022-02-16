@@ -31,6 +31,7 @@ public class Workplace extends ExternalEntity {
   private BigDecimal amount;
   private BigDecimal limit;
   private List<OperationTypeLimit> categoryLimits;
+  private boolean tobeIncreased;
 
   public Workplace() {
     categoryLimits = new ArrayList<>();
