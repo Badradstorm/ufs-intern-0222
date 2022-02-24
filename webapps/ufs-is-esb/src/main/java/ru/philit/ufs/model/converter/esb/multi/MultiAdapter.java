@@ -1,5 +1,6 @@
 package ru.philit.ufs.model.converter.esb.multi;
 
+import ru.philit.ufs.model.converter.esb.asfs.CashOrderAdapter;
 import ru.philit.ufs.model.converter.esb.asfs.WorkPlaceAdapter;
 import ru.philit.ufs.model.converter.esb.eks.AccountAdapter;
 import ru.philit.ufs.model.converter.esb.eks.CheckFraudAdapter;
@@ -136,19 +137,19 @@ public class MultiAdapter {
     } else if (source instanceof SrvCashSymbolsListRs) {
       return CashSymbolAdapter.convert((SrvCashSymbolsListRs) source);
     }
-//
-//    else if (source instanceof SrvUpdStCashOrderRs) {
-//      return CashOrderAdapter.convert((SrvUpdStCashOrderRs) source);
-//    }
-//
-//    else if (source instanceof SrvGetCashOrderRs) {
-//      return CashOrderAdapter.convert((SrvGetCashOrderRs) source);
-//    }
-//
-//    else if (source instanceof SrvCreateCashOrderRs) {
-//      return CashOrderAdapter.convert((SrvCreateCashOrderRs) source);
-//    }
-//
+
+    else if (source instanceof SrvUpdStCashOrderRs) {
+      return CashOrderAdapter.convert((SrvUpdStCashOrderRs) source);
+    }
+
+    else if (source instanceof SrvGetCashOrderRs) {
+      return CashOrderAdapter.convert((SrvGetCashOrderRs) source);
+    }
+
+    else if (source instanceof SrvCreateCashOrderRs) {
+      return CashOrderAdapter.convert((SrvCreateCashOrderRs) source);
+    }
+
 //    else if (source instanceof SrvCheckOverLimitRs) {
 //      return CheckOverLimitAdapter.convert((SrvCheckOverLimitRs) source);
 //    }
