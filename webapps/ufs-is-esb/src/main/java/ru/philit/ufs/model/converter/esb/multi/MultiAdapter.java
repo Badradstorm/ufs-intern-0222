@@ -136,26 +136,21 @@ public class MultiAdapter {
 
     } else if (source instanceof SrvCashSymbolsListRs) {
       return CashSymbolAdapter.convert((SrvCashSymbolsListRs) source);
-    }
 
-    else if (source instanceof SrvUpdStCashOrderRs) {
+    } else if (source instanceof SrvUpdStCashOrderRs) {
       return CashOrderAdapter.convert((SrvUpdStCashOrderRs) source);
-    }
 
-    else if (source instanceof SrvGetCashOrderRs) {
+    } else if (source instanceof SrvGetCashOrderRs) {
       return CashOrderAdapter.convert((SrvGetCashOrderRs) source);
-    }
 
-    else if (source instanceof SrvCreateCashOrderRs) {
+    } else if (source instanceof SrvCreateCashOrderRs) {
       return CashOrderAdapter.convert((SrvCreateCashOrderRs) source);
-    }
 
-//    else if (source instanceof SrvCheckOverLimitRs) {
-//      return CheckOverLimitAdapter.convert((SrvCheckOverLimitRs) source);
-//    }
-
-    else if (source instanceof SrvGetWorkPlaceInfoRs) {
+    } else if (source instanceof SrvGetWorkPlaceInfoRs) {
       return WorkPlaceAdapter.convert((SrvGetWorkPlaceInfoRs) source);
+
+    } else if (source instanceof SrvCheckOverLimitRs) {
+      return CashOrderAdapter.convert((SrvCheckOverLimitRs) source);
     }
 
     return null;

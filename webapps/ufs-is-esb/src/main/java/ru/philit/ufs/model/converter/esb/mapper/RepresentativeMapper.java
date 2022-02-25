@@ -12,5 +12,6 @@ public interface RepresentativeMapper {
   @Mapping(source = "representative.birthDate", target = "dateOfBirth")
   @Mapping(source = "representative.identityDocuments", target = "identityDocumentType")
   @Mapping(source = "representative.inn", target = "INN")
-  RepData toRepDataDTO(Representative representative);
+  @Mapping(source = "representative.repFio", target = "repFIO")
+  RepData toRepDataDto(Representative representative);
 }

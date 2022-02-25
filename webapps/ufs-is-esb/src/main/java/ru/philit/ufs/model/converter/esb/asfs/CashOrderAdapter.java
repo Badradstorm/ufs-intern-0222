@@ -2,6 +2,10 @@ package ru.philit.ufs.model.converter.esb.asfs;
 
 import ru.philit.ufs.model.converter.esb.mapper.CashOrderMapper;
 import ru.philit.ufs.model.entity.common.ExternalEntityList;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq.SrvCheckOverLimitRqMessage;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRs.SrvCheckOverLimitRsMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
@@ -27,8 +31,8 @@ public class CashOrderAdapter extends AsfsAdapter {
    * Преобразует транспортный объект SrvCreateCashOrderRs во внутреннюю сущность CashOrder.
    */
   public static CashOrder convert(SrvCreateCashOrderRs response) {
-    SrvCreateCashOrderRsMessage messageDTO = response.getSrvCreateCashOrderRsMessage();
-    CashOrder cashOrder = mapper.toModel(messageDTO);
+    SrvCreateCashOrderRsMessage messageDto = response.getSrvCreateCashOrderRsMessage();
+    CashOrder cashOrder = mapper.toModel(messageDto);
     map(response.getHeaderInfo(), cashOrder);
     return cashOrder;
   }
@@ -52,8 +56,18 @@ public class CashOrderAdapter extends AsfsAdapter {
    * Преобразует транспортный объект SrvUpdCashOrderRs во внутреннюю сущность CashOrder.
    */
   public static CashOrder convert(SrvUpdStCashOrderRs response) {
-    SrvUpdCashOrderRsMessage messageDTO = response.getSrvUpdCashOrderRsMessage();
-    CashOrder cashOrder = mapper.toModel(messageDTO);
+    SrvUpdCashOrderRsMessage messageDto = response.getSrvUpdCashOrderRsMessage();
+    CashOrder cashOrder = mapper.toModel(messageDto);
+    map(response.getHeaderInfo(), cashOrder);
+    return cashOrder;
+  }
+
+  /**
+   * Преобразует транспортный объект SrvCheckOverLimitRs во внутреннюю сущность CashOrder.
+   */
+  public static CashOrder convert(SrvCheckOverLimitRs response) {
+    SrvCheckOverLimitRsMessage messageDto = response.getSrvCheckOverLimitRsMessage();
+    CashOrder cashOrder = mapper.toModel(messageDto);
     map(response.getHeaderInfo(), cashOrder);
     return cashOrder;
   }
@@ -88,6 +102,17 @@ public class CashOrderAdapter extends AsfsAdapter {
     SrvUpdCashOrderRqMessage message = mapper.toUpdStCashOrderRqMessage(cashOrder);
     request.setHeaderInfo(headerInfo());
     request.setSrvUpdCashOrderRqMessage(message);
+    return request;
+  }
+
+  /**
+   * Возвращает объект запроса обновления статуса кассового ордера.
+   */
+  public static SrvCheckOverLimitRq requestCheckOverLimit(CashOrder cashOrder) {
+    SrvCheckOverLimitRq request = new SrvCheckOverLimitRq();
+    SrvCheckOverLimitRqMessage message = mapper.toCheckOverLimitRqMessage(cashOrder);
+    request.setHeaderInfo(headerInfo());
+    request.setSrvCheckOverLimitRqMessage(message);
     return request;
   }
 }

@@ -23,7 +23,7 @@ public class Representative extends ExternalEntity {
   private String firstName;
   private String lastName;
   private String patronymic;
-  private String repFIO;
+  private String repFio;
   private String phoneNumWork;
   private String phoneNumMobile;
   private String email;

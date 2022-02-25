@@ -58,7 +58,6 @@ public class WorkPlaceAdapterTest extends AsfsAdapterBaseTest {
   @Test
   public void testConvertSrvGetWorkPlaceInfoRs() {
     Workplace workplace = WorkPlaceAdapter.convert(response);
-    List<OperationTypeLimit> categoryLimits = workplace.getCategoryLimits();
 
     assertHeaderInfo(workplace);
     Assert.assertEquals(workplace.getType().code(), 0);
@@ -69,6 +68,8 @@ public class WorkPlaceAdapterTest extends AsfsAdapterBaseTest {
     Assert.assertEquals(workplace.getCurrencyType(), "rub");
     Assert.assertEquals(workplace.getAmount(), BigDecimal.valueOf(2.000));
     Assert.assertEquals(workplace.getLimit(), BigDecimal.valueOf(3.000));
+
+    List<OperationTypeLimit> categoryLimits = workplace.getCategoryLimits();
     Assert.assertEquals(categoryLimits.size(), 1);
     Assert.assertEquals(categoryLimits.get(0).getCategoryId(), BigInteger.valueOf(1).toString());
     Assert.assertEquals(categoryLimits.get(0).getLimit(), BigDecimal.valueOf(2.000));

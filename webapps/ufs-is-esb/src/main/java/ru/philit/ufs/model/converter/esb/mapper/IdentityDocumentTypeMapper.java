@@ -9,5 +9,5 @@ import ru.philit.ufs.model.entity.esb.asfs.IDDtype;
 public interface IdentityDocumentTypeMapper {
 
   @ValueMapping(source = "INTERNAL_PASSPORT", target = "INTERNPASSPORT")
-  IDDtype toDTO(IdentityDocumentType identityDocumentType);
+  IDDtype toDto(IdentityDocumentType identityDocumentType);
 }

@@ -3,6 +3,10 @@ package ru.philit.ufs.model.converter.esb.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import ru.philit.ufs.model.entity.esb.asfs.LimitStatusType;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq.SrvCheckOverLimitRqMessage;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRs.SrvCheckOverLimitRsMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRq.SrvGetCashOrderRqMessage;
@@ -16,7 +20,8 @@ import ru.philit.ufs.model.entity.order.CashOrder;
         OperationTypeCodeMapper.class,
         CashSymbolMapper.class,
         CashOrderStatusMapper.class,
-        RepresentativeMapper.class})
+        RepresentativeMapper.class,
+        LimitStatusTypeMapper.class})
 public interface CashOrderMapper {
 
   CashOrderMapper INSTANCE = Mappers.getMapper(CashOrderMapper.class);
@@ -28,7 +33,9 @@ public interface CashOrderMapper {
   @Mapping(source = "cashOrder.cashSymbols", target = "additionalInfo.cashSymbols.cashSymbolItem")
   @Mapping(source = "cashOrder.representative", target = "repData")
   @Mapping(source = "cashOrder.operator.subbranch", target = "additionalInfo")
-  @Mapping(source = "cashOrder.operator.subbranch.subbranchCode", target = "additionalInfo.subbranchCode")
+  @Mapping(
+      source = "cashOrder.operator.subbranch.subbranchCode",
+      target = "additionalInfo.subbranchCode")
   @Mapping(source = "cashOrder.operator.subbranch.tbCode", target = "additionalInfo.TBCode")
   @Mapping(source = "cashOrder.operator.subbranch.gosbCode", target = "additionalInfo.GOSBCode")
   @Mapping(source = "cashOrder.operator.subbranch.osbCode", target = "additionalInfo.OSBCode")
@@ -39,19 +46,32 @@ public interface CashOrderMapper {
 
   SrvUpdCashOrderRqMessage toUpdStCashOrderRqMessage(CashOrder cashOrder);
 
-  @Mapping(source = "messageDTO.cashSymbols.cashSymbolItem", target = "cashSymbols")
-  @Mapping(source = "messageDTO.INN", target = "representative.inn")
-  @Mapping(source = "messageDTO.subbranchCode", target = "operator.subbranch.subbranchCode")
-  @Mapping(source = "messageDTO.userFullName", target = "operator.operatorFullName")
-  @Mapping(source = "messageDTO.repFIO", target = "representative.repFIO")
-  CashOrder toModel(SrvCreateCashOrderRsMessage messageDTO);
+  SrvCheckOverLimitRqMessage toCheckOverLimitRqMessage(CashOrder cashOrder);
 
-  @Mapping(source = "itemDTO.cashSymbols.cashSymbolItem", target = "cashSymbols")
-  @Mapping(source = "itemDTO.INN", target = "representative.inn")
-  @Mapping(source = "itemDTO.subbranchCode", target = "operator.subbranch.subbranchCode")
-  @Mapping(source = "itemDTO.userFullName", target = "operator.operatorFullName")
-  @Mapping(source = "itemDTO.repFIO", target = "representative.repFIO")
-  CashOrder toModel(CashOrderItem itemDTO);
+  @Mapping(source = "messageDto.cashSymbols.cashSymbolItem", target = "cashSymbols")
+  @Mapping(source = "messageDto.INN", target = "representative.inn")
+  @Mapping(source = "messageDto.subbranchCode", target = "operator.subbranch.subbranchCode")
+  @Mapping(source = "messageDto.userFullName", target = "operator.operatorFullName")
+  @Mapping(source = "messageDto.repFIO", target = "representative.repFio")
+  @Mapping(source = "messageDto.senderBankBIC", target = "senderBankBic")
+  @Mapping(source = "messageDto.recipientBankBIC", target = "recipientBankBic")
+  @Mapping(source = "messageDto.clientTypeFK", target = "clientTypeFk")
+  @Mapping(source = "messageDto.FDestLEName", target = "destName")
+  CashOrder toModel(SrvCreateCashOrderRsMessage messageDto);
 
-  CashOrder toModel(SrvUpdCashOrderRsMessage messageDTO);
+  @Mapping(source = "itemDto.cashSymbols.cashSymbolItem", target = "cashSymbols")
+  @Mapping(source = "itemDto.INN", target = "representative.inn")
+  @Mapping(source = "itemDto.subbranchCode", target = "operator.subbranch.subbranchCode")
+  @Mapping(source = "itemDto.userFullName", target = "operator.operatorFullName")
+  @Mapping(source = "itemDto.repFIO", target = "representative.repFio")
+  @Mapping(source = "itemDto.senderBankBIC", target = "senderBankBic")
+  @Mapping(source = "itemDto.recipientBankBIC", target = "recipientBankBic")
+  @Mapping(source = "itemDto.clientTypeFK", target = "clientTypeFk")
+  @Mapping(source = "itemDto.FDestLEName", target = "destName")
+  CashOrder toModel(CashOrderItem itemDto);
+
+  CashOrder toModel(SrvUpdCashOrderRsMessage messageDto);
+
+  @Mapping(source = "messageDto.status", target = "limitStatus")
+  CashOrder toModel(SrvCheckOverLimitRsMessage messageDto);
 }

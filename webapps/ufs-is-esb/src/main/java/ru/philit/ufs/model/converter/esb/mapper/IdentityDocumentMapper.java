@@ -9,5 +9,5 @@ import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq.SrvCreateCashOrd
 public interface IdentityDocumentMapper {
 
   @Mapping(source = "identityDocument.type", target = "value")
-  IdentityDocumentType toDTO(IdentityDocument identityDocument);
+  IdentityDocumentType toDto(IdentityDocument identityDocument);
 }

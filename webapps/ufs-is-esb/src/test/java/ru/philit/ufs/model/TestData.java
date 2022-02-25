@@ -63,7 +63,8 @@ public class TestData {
   public static final IDDtype IDENTITY_DOCUMENT_TYPE = IDDtype.PASSPORT;
   public static final String IDENTITY_DOCUMENT_ISSUED_BY = "ОВД Москвы";
   public static final Date IDENTITY_DOCUMENT_ISSUED_DATE = date(2014, 5, 4, 0, 0);
-  public static final XMLGregorianCalendar IDENTITY_DOCUMENT_ISSUED_DATE_XML = xmlCalendar(2014, 5, 4, 0, 0);
+  public static final XMLGregorianCalendar IDENTITY_DOCUMENT_ISSUED_DATE_XML = xmlCalendar(2014, 5,
+      4, 0, 0);
   public static final String IDENTITY_DOCUMENT_NUMBER = "1111111";
   public static final String IDENTITY_DOCUMENT_SERIES = "5101";
 
@@ -248,11 +249,11 @@ public class TestData {
     cashOrder.setCreatedDttm(date(2017, 4, 17, 17, 0));
     cashOrder.setOperationId(OPERATION_ID);
     cashOrder.setSenderBank(SENDER_BANK);
-    cashOrder.setSenderBankBIC(SENDER_BANK_BIC);
+    cashOrder.setSenderBankBic(SENDER_BANK_BIC);
     cashOrder.setRecipientBank(RECIPIENT_BANK);
-    cashOrder.setRecipientBankBIC(RECIPIENT_BANK_BIC);
-    cashOrder.setClientTypeFK(CLIENT_TYPE_FK);
-    cashOrder.setFDestLEName(F_DEST_LE_NAME);
+    cashOrder.setRecipientBankBic(RECIPIENT_BANK_BIC);
+    cashOrder.setClientTypeFk(CLIENT_TYPE_FK);
+    cashOrder.setDestName(F_DEST_LE_NAME);
     cashOrder.setLegalEntityShortName(LEGAL_ENTITY_SHORT_NAME);
     cashOrder.setRepresentative(new Representative());
     cashOrder.getRepresentative().setInn(INN);
@@ -269,24 +270,23 @@ public class TestData {
     cashSymbol.setAmount(CASH_SYMBOL_AMOUNT);
     cashSymbol.setCode(CASH_SYMBOL);
     cashOrder.getCashSymbols().add(cashSymbol);
-
     cashOrder.setOperationType(OperationTypeCode.TO_CARD_DEPOSIT);
     cashOrder.setAmountInWords(AMOUNT_IN_WORDS);
     cashOrder.setCurrencyType(CURRENCY_TYPE);
     cashOrder.getOperator().setWorkplaceId(WORKPLACE_ID);
     cashOrder.getRepresentative().setId(REP_ID);
-    cashOrder.getRepresentative().setRepFIO(REP_FIO);
+    cashOrder.getRepresentative().setRepFio(REP_FIO);
     cashOrder.getRepresentative().setAddress(REP_Address);
     cashOrder.getRepresentative().setBirthDate(REP_BIRTH_DATE);
     cashOrder.getRepresentative().setPlaceOfBirth(REP_PlaceOfBirth);
     cashOrder.getRepresentative().setResident(REP_Resident);
-    List<IdentityDocument> identityDocuments = new ArrayList<>();
     IdentityDocument identityDocument = new IdentityDocument();
     identityDocument.setType(IdentityDocumentType.PASSPORT);
     identityDocument.setIssuedBy(IDENTITY_DOCUMENT_ISSUED_BY);
     identityDocument.setIssuedDate(IDENTITY_DOCUMENT_ISSUED_DATE);
     identityDocument.setNumber(IDENTITY_DOCUMENT_NUMBER);
     identityDocument.setSeries(IDENTITY_DOCUMENT_SERIES);
+    List<IdentityDocument> identityDocuments = new ArrayList<>();
     identityDocuments.add(identityDocument);
     cashOrder.getRepresentative().setIdentityDocuments(identityDocuments);
     cashOrder.setComment(COMMENT);
@@ -295,5 +295,6 @@ public class TestData {
     cashOrder.getOperator().getSubbranch().setGosbCode(SUBBRANCH_GOSB_CODE);
     cashOrder.getOperator().getSubbranch().setTbCode(SUBBRANCH_TB_CODE);
     cashOrder.setAccount20202Num(ACCOUNT_20202_NUM);
+    cashOrder.setTobeIncreased(true);
   }
 }

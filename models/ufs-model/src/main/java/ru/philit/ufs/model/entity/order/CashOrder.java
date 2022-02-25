@@ -3,7 +3,6 @@ package ru.philit.ufs.model.entity.order;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,11 +38,11 @@ public class CashOrder extends ExternalEntity {
   private Date createdDttm; // Дата создания
   private String operationId; // Номер кассовой операции
   private String senderBank; // Банк-отправитель
-  private String senderBankBIC; // БИК банка-отправителя
+  private String senderBankBic; // БИК банка-отправителя
   private String recipientBank; // Банк-получатель
-  private String recipientBankBIC; // БИК банка-получателя
-  private Boolean clientTypeFK; // Признак типа клиента ФК/ОФК/УОВФ
-  private String fDestLEName; // Наименование организации в ФК/ОФК/УОВФ
+  private String recipientBankBic; // БИК банка-получателя
+  private Boolean clientTypeFk; // Признак типа клиента ФК/ОФК/УОВФ
+  private String destName; // Наименование организации в ФК/ОФК/УОВФ
   private Representative representative; // Представитель корпоративного бизнеса
   private Operator operator; // Оператор
   private String account20202Num; // Счет № 20202 "Касса кредитных организаций"
@@ -52,6 +51,8 @@ public class CashOrder extends ExternalEntity {
   private Date createdFrom;
   private Date createdTo;
   private String legalEntityShortName;
+  private boolean tobeIncreased;
+  private boolean limitStatus;
 
   /**
    * Конструктор кассового ордера.

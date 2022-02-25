@@ -12,7 +12,7 @@ public interface CashSymbolMapper {
 
   @Mapping(source = "cashSymbol.code", target = "cashSymbol")
   @Mapping(source = "cashSymbol.amount", target = "cashSymbolAmount")
-  CashSymbolItem toDTO(CashSymbol cashSymbol);
+  CashSymbolItem toDto(CashSymbol cashSymbol);
 
   @Mapping(source = "cashSymbolItem.cashSymbol", target = "code")
   @Mapping(source = "cashSymbolItem.cashSymbolAmount", target = "amount")

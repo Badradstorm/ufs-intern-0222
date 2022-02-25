@@ -7,5 +7,5 @@ import ru.philit.ufs.model.entity.esb.asfs.OperTypeLabel;
 @Mapper
 public interface OperationTypeCodeMapper {
 
-  OperTypeLabel toDTO(OperationTypeCode operationTypeCode);
+  OperTypeLabel toDto(OperationTypeCode operationTypeCode);
 }

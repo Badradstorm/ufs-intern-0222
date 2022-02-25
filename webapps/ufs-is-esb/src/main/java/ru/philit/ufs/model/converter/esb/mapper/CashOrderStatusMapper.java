@@ -7,7 +7,7 @@ import ru.philit.ufs.model.entity.order.CashOrderStatus;
 @Mapper
 public interface CashOrderStatusMapper {
 
-  CashOrderStatusType toDTO(CashOrderStatus cashOrderStatus);
+  CashOrderStatusType toDto(CashOrderStatus cashOrderStatus);
 
   CashOrderStatus toModel(CashOrderStatusType cashOrderStatusType);
 }
