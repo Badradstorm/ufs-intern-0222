@@ -30,6 +30,11 @@ public class RequestType {
   public static final String OPERATOR_BY_USER = "OPERATOR_BY_USER";
   public static final String OPERATOR_BY_ID = "OPERATOR_BY_ID";
   public static final String CASH_SYMBOL = "CASH_SYMBOL";
+  public static final String CREATE_CASH_ORDER = "CREATE_CASH_ORDER";
+  public static final String UPDATE_CASH_ORDER = "UPDATE_CASH_ORDER";
+  public static final String CASH_ORDER_FROM_DATE_TO_DATE = "CASH_ORDER_FROM_DATE_TO_DATE";
+  public static final String CHECK_OVER_LIMIT = "CHECK_OVER_LIMIT";
+  public static final String WORKPLACE_BY_ID = "WORKPLACE_BY_ID";
 
   private RequestType() {}
 

@@ -6,8 +6,11 @@ import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ACCOUNT_BY_CAR
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ACCOUNT_BY_ID_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ACCOUNT_RESIDUES_BY_ID_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.AUDITED_REQUESTS;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_ORDER_FROM_DATE_TO_DATE_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_ORDER_RESPONSE_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_SYMBOLS_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CHECK_FRAUD_BY_ACCOUNT_OPERATION_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CHECK_OVER_LIMIT_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.COMMISSION_BY_ACCOUNT_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.LEGAL_ENTITY_BY_ACCOUNT_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.LOGGED_EVENTS;
@@ -32,6 +35,7 @@ import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.RESPONSE_FLAG_
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.RESPONSE_QUEUE;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.SEIZURES_BY_ACCOUNT_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.USER_BY_SESSION_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.WORKPLACE_BY_ID_MAP;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
@@ -75,10 +79,13 @@ import ru.philit.ufs.model.entity.oper.OperationType;
 import ru.philit.ufs.model.entity.oper.OperationTypeFavourite;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
+import ru.philit.ufs.model.entity.order.CashOrder;
+import ru.philit.ufs.model.entity.order.CashOrderRequest;
 import ru.philit.ufs.model.entity.service.AuditEntity;
 import ru.philit.ufs.model.entity.service.LogEntity;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.User;
+import ru.philit.ufs.model.entity.user.Workplace;
 
 /**
  * Контейнер коллекций распределённого кеша.
@@ -99,81 +106,122 @@ public class HazelcastServer {
   /**
    * Очередь для поступления запросов данных.
    */
-  @Getter private IQueue<ExternalEntityRequest> requestQueue;
+  @Getter
+  private IQueue<ExternalEntityRequest> requestQueue;
   /**
    * Очередь для поступления ответов на запросы данных.
    */
-  @Getter private IQueue<ExternalEntity> responseQueue;
+  @Getter
+  private IQueue<ExternalEntity> responseQueue;
 
   /**
    * Коллекция запросов данных.
    */
-  @Getter private IMap<String, ExternalEntityRequest> requestMap;
+  @Getter
+  private IMap<String, ExternalEntityRequest> requestMap;
   /**
    * Коллекция регистрации ответов на запросы данных.
    */
-  @Getter private IMap<ExternalEntityRequest, String> responseFlagMap;
+  @Getter
+  private IMap<ExternalEntityRequest, String> responseFlagMap;
 
   /**
    * Коллекция активных сессий пользователей.
    */
-  @Getter private IMap<String, User> userBySessionMap;
+  @Getter
+  private IMap<String, User> userBySessionMap;
 
   /**
    * Коллекция операций задач.
    */
-  @Getter private IMap<Long, Operation> operationByTaskMap;
+  @Getter
+  private IMap<Long, Operation> operationByTaskMap;
 
   /**
    * Коллекция запросов аудита.
    */
-  @Getter private IList<AuditEntity> auditedRequests;
+  @Getter
+  private IList<AuditEntity> auditedRequests;
   /**
    * Коллекция событий лога.
    */
-  @Getter private IList<LogEntity> loggedEvents;
+  @Getter
+  private IList<LogEntity> loggedEvents;
 
   /*
    * Коллекции данных, полученных на запросы из Мастер-систем.
    */
 
-  @Getter private IMap<LocalKey<String>, Account> accountByIdMap;
-  @Getter private IMap<LocalKey<String>, Account> accountByCardNumberMap;
-  @Getter private IMap<LocalKey<String>, AccountResidues> accountResiduesByIdMap;
-  @Getter private IMap<LocalKey<String>, List<Account>> accountsByLegalEntityMap;
-  @Getter private IMap<LocalKey<String>, LegalEntity> legalEntityByAccountMap;
-  @Getter private IMap<LocalKey<String>, List<Seizure>> seizuresByAccountMap;
-  @Getter private IMap<LocalKey<String>, List<PaymentOrderCardIndex1>>
+  @Getter
+  private IMap<LocalKey<String>, Account> accountByIdMap;
+  @Getter
+  private IMap<LocalKey<String>, Account> accountByCardNumberMap;
+  @Getter
+  private IMap<LocalKey<String>, AccountResidues> accountResiduesByIdMap;
+  @Getter
+  private IMap<LocalKey<String>, List<Account>> accountsByLegalEntityMap;
+  @Getter
+  private IMap<LocalKey<String>, LegalEntity> legalEntityByAccountMap;
+  @Getter
+  private IMap<LocalKey<String>, List<Seizure>> seizuresByAccountMap;
+  @Getter
+  private IMap<LocalKey<String>, List<PaymentOrderCardIndex1>>
       payOrdersCardIndex1ByAccountMap;
-  @Getter private IMap<LocalKey<String>, List<PaymentOrderCardIndex2>>
+  @Getter
+  private IMap<LocalKey<String>, List<PaymentOrderCardIndex2>>
       payOrdersCardIndex2ByAccountMap;
-  @Getter private IMap<LocalKey<AccountOperationRequest>, ExternalEntityContainer<BigDecimal>>
+  @Getter
+  private IMap<LocalKey<AccountOperationRequest>, ExternalEntityContainer<BigDecimal>>
       commissionByAccountOperationMap;
-  @Getter private IMap<LocalKey<AccountOperationRequest>, ExternalEntityContainer<Boolean>>
+  @Getter
+  private IMap<LocalKey<AccountOperationRequest>, ExternalEntityContainer<Boolean>>
       checkFraudByAccountOperationMap;
 
-  @Getter private IMap<LocalKey<OperationPackageRequest>, OperationPackage> operationPackageInfoMap;
-  @Getter private IMap<LocalKey<OperationTasksRequest>, List<OperationPackage>> operationPackageMap;
-  @Getter private IMap<LocalKey<OperationPackage>, OperationPackage> operationPackageResponseMap;
+  @Getter
+  private IMap<LocalKey<OperationPackageRequest>, OperationPackage> operationPackageInfoMap;
+  @Getter
+  private IMap<LocalKey<OperationTasksRequest>, List<OperationPackage>> operationPackageMap;
+  @Getter
+  private IMap<LocalKey<OperationPackage>, OperationPackage> operationPackageResponseMap;
 
-  @Getter private IMap<LocalKey<String>, CashDepositAnnouncement> ovnByUidMap;
-  @Getter private IMap<LocalKey<CashDepositAnnouncementsRequest>, List<CashDepositAnnouncement>>
+  @Getter
+  private IMap<LocalKey<String>, CashDepositAnnouncement> ovnByUidMap;
+  @Getter
+  private IMap<LocalKey<CashDepositAnnouncementsRequest>, List<CashDepositAnnouncement>>
       ovnsMap;
-  @Getter private IMap<LocalKey<CashDepositAnnouncement>, CashDepositAnnouncement> ovnResponseMap;
+  @Getter
+  private IMap<LocalKey<CashDepositAnnouncement>, CashDepositAnnouncement> ovnResponseMap;
 
-  @Getter private IMap<LocalKey<String>, ExternalEntityContainer<String>>
+  @Getter
+  private IMap<LocalKey<String>, ExternalEntityContainer<String>>
       account20202ByWorkPlaceMap;
-  @Getter private IMap<LocalKey<Serializable>, List<OperationType>> operationTypesByRolesMap;
-  @Getter private IMap<LocalKey<RepresentativeRequest>, List<Representative>> representativeMap;
+  @Getter
+  private IMap<LocalKey<Serializable>, List<OperationType>> operationTypesByRolesMap;
+  @Getter
+  private IMap<LocalKey<RepresentativeRequest>, List<Representative>> representativeMap;
 
-  @Getter private IMap<String, List<OperationTypeFavourite>> operationTypeFavouritesByUserMap;
+  @Getter
+  private IMap<String, List<OperationTypeFavourite>> operationTypeFavouritesByUserMap;
 
-  @Getter private IMap<LocalKey<String>, Representative> representativeByCardMap;
+  @Getter
+  private IMap<LocalKey<String>, Representative> representativeByCardMap;
 
-  @Getter private IMap<LocalKey<String>, Operator> operatorByUserMap;
-  @Getter private IMap<LocalKey<String>, Operator> operatorByIdMap;
+  @Getter
+  private IMap<LocalKey<String>, Operator> operatorByUserMap;
+  @Getter
+  private IMap<LocalKey<String>, Operator> operatorByIdMap;
 
-  @Getter private IMap<LocalKey<CashSymbolRequest>, List<CashSymbol>> cashSymbolsMap;
+  @Getter
+  private IMap<LocalKey<CashSymbolRequest>, List<CashSymbol>> cashSymbolsMap;
+
+  @Getter
+  private IMap<LocalKey<CashOrder>, CashOrder> cashOrderResponseMap;
+  @Getter
+  private IMap<LocalKey<CashOrderRequest>, List<CashOrder>> cashOrderFromDateToDateMap;
+  @Getter
+  private IMap<LocalKey<CashOrder>, ExternalEntityContainer<Boolean>> checkOverLimitMap;
+  @Getter
+  private IMap<LocalKey<String>, Workplace> workPlaceByIdMap;
 
   /**
    * Конструктор бина.
@@ -239,12 +287,13 @@ public class HazelcastServer {
 
     for (String mapName : new String[]{ACCOUNT_BY_ID_MAP, ACCOUNT_BY_CARD_NUMBER_MAP,
         ACCOUNT_RESIDUES_BY_ID_MAP, ACCOUNTS_BY_LEGAL_ENTITY_MAP, LEGAL_ENTITY_BY_ACCOUNT_MAP,
-        SEIZURES_BY_ACCOUNT_MAP,
-        PAY_ORDERS_CARD_INDEX_1_BY_ACCOUNT_MAP, PAY_ORDERS_CARD_INDEX_2_BY_ACCOUNT_MAP,
-        COMMISSION_BY_ACCOUNT_OPERATION_MAP, CHECK_FRAUD_BY_ACCOUNT_OPERATION_MAP,
-        OVN_BY_UID_MAP, OVNS_MAP, ACCOUNT_20202_BY_WORK_PLACE_MAP, OPERATION_TYPES_BY_ROLES_MAP,
+        SEIZURES_BY_ACCOUNT_MAP, PAY_ORDERS_CARD_INDEX_1_BY_ACCOUNT_MAP,
+        PAY_ORDERS_CARD_INDEX_2_BY_ACCOUNT_MAP, COMMISSION_BY_ACCOUNT_OPERATION_MAP,
+        CHECK_FRAUD_BY_ACCOUNT_OPERATION_MAP, OVN_BY_UID_MAP, OVNS_MAP,
+        ACCOUNT_20202_BY_WORK_PLACE_MAP, OPERATION_TYPES_BY_ROLES_MAP,
         REPRESENTATIVE_MAP, REPRESENTATIVE_BY_CARD_MAP, OPERATOR_BY_USER_MAP, OPERATOR_BY_ID_MAP,
-        CASH_SYMBOLS_MAP}) {
+        CASH_SYMBOLS_MAP, CASH_ORDER_RESPONSE_MAP, CASH_ORDER_FROM_DATE_TO_DATE_MAP,
+        CHECK_OVER_LIMIT_MAP, WORKPLACE_BY_ID_MAP}) {
       MapConfig mapConfig = new MapConfig();
       mapConfig.setName(mapName);
       mapConfig.setTimeToLiveSeconds(3600);
@@ -292,6 +341,11 @@ public class HazelcastServer {
     operatorByUserMap = instance.getMap(OPERATOR_BY_USER_MAP);
     operatorByIdMap = instance.getMap(OPERATOR_BY_ID_MAP);
     cashSymbolsMap = instance.getMap(CASH_SYMBOLS_MAP);
+
+    cashOrderResponseMap = instance.getMap(CASH_ORDER_RESPONSE_MAP);
+    cashOrderFromDateToDateMap = instance.getMap(CASH_ORDER_FROM_DATE_TO_DATE_MAP);
+    checkOverLimitMap = instance.getMap(CHECK_OVER_LIMIT_MAP);
+    workPlaceByIdMap = instance.getMap(WORKPLACE_BY_ID_MAP);
 
     logger.info("Hazelcast server for {} is started", instance.getName());
   }

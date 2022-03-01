@@ -31,8 +31,11 @@ import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.oper.OperationType;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
+import ru.philit.ufs.model.entity.order.CashOrder;
+import ru.philit.ufs.model.entity.order.CashOrderRequest;
 import ru.philit.ufs.model.entity.request.RequestType;
 import ru.philit.ufs.model.entity.user.Operator;
+import ru.philit.ufs.model.entity.user.Workplace;
 import ru.philit.ufs.model.server.HazelcastServer;
 
 /**
@@ -299,6 +302,42 @@ public class ResponseListener
           hazelcastServer.getCashSymbolsMap().put(
               new LocalKey<>(request.getSessionId(), (CashSymbolRequest) request.getRequestData()),
               ((ExternalEntityList<CashSymbol>) entity).getItems());
+        }
+        break;
+
+      case RequestType.CREATE_CASH_ORDER:
+      case RequestType.UPDATE_CASH_ORDER:
+        if (entity instanceof CashOrder) {
+          hazelcastServer.getCashOrderResponseMap().put(
+              new LocalKey<>(request.getSessionId(),
+                  (CashOrder) request.getRequestData()),
+              (CashOrder) entity);
+        }
+        break;
+
+      case RequestType.CASH_ORDER_FROM_DATE_TO_DATE:
+        if (entity instanceof ExternalEntityList
+            && (elementClass1 == null || elementClass1 == CashOrder.class)) {
+          hazelcastServer.getCashOrderFromDateToDateMap().put(
+              new LocalKey<>(request.getSessionId(),
+                  (CashOrderRequest) request.getRequestData()),
+              ((ExternalEntityList<CashOrder>) entity).getItems());
+        }
+        break;
+
+      case RequestType.CHECK_OVER_LIMIT:
+        if (entity instanceof ExternalEntityContainer) {
+          hazelcastServer.getCheckOverLimitMap().put(
+              new LocalKey<>(request.getSessionId(), (CashOrder) request.getRequestData()),
+              (ExternalEntityContainer<Boolean>) entity);
+        }
+        break;
+
+      case RequestType.WORKPLACE_BY_ID:
+        if (entity instanceof Workplace) {
+          hazelcastServer.getWorkPlaceByIdMap().put(
+              new LocalKey<>(request.getSessionId(), (String) request.getRequestData()),
+              (Workplace) entity);
         }
         break;
 
