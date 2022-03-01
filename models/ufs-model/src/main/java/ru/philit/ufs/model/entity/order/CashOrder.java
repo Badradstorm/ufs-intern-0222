@@ -48,8 +48,6 @@ public class CashOrder extends ExternalEntity {
   private String account20202Num; // Счет № 20202 "Касса кредитных организаций"
   private String userLogin; // Логин оператора
   private String userPosition; // Должность кассового работника
-  private Date createdFrom;
-  private Date createdTo;
   private String legalEntityShortName;
   private boolean tobeIncreased;
   private boolean limitStatus;
