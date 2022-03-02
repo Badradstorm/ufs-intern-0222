@@ -23,7 +23,7 @@ import ru.philit.ufs.model.entity.user.Operator;
 public class CashOrder extends ExternalEntity {
 
   private String responseCode; // Код ответа
-  private String responseMsg; // Response message
+  private String responseMsg; // Сообщение ответа
   private String comment; // Комментарий (источник поступления/цель расхода)
   private String cashOrderId; // Номер заявки в ЕФС для кассового ордера
   private OperationTypeCode operationType; // Тип операции
@@ -50,7 +50,6 @@ public class CashOrder extends ExternalEntity {
   private String userPosition; // Должность кассового работника
   private String legalEntityShortName;
   private boolean tobeIncreased;
-  private boolean limitStatus;
 
   /**
    * Конструктор кассового ордера.

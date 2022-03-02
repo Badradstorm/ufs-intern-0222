@@ -263,8 +263,6 @@ public class TestData {
     cashOrder.setUserLogin(USER_LOGIN);
     cashOrder.getOperator().setOperatorFullName(USER_FULLNAME);
     cashOrder.setUserPosition(USER_POSITION);
-    cashOrder.setCreatedFrom(date(2017, 1, 17, 17, 0));
-    cashOrder.setCreatedTo(date(2017, 5, 17, 17, 0));
     cashOrder.setCashSymbols(new ArrayList<>());
     CashSymbol cashSymbol = new CashSymbol();
     cashSymbol.setAmount(CASH_SYMBOL_AMOUNT);

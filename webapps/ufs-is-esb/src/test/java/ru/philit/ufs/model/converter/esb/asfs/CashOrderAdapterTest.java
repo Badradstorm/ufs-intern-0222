@@ -7,6 +7,7 @@ import org.junit.Test;
 import ru.philit.ufs.model.TestData;
 import ru.philit.ufs.model.converter.esb.multi.MultiAdapter;
 import ru.philit.ufs.model.entity.common.ExternalEntity;
+import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
 import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.esb.asfs.LimitStatusType;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq;
@@ -28,6 +29,7 @@ import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs.SrvUpdCashOrderRsMessage;
 import ru.philit.ufs.model.entity.order.CashOrder;
+import ru.philit.ufs.model.entity.order.CashOrderRequest;
 
 public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
 
@@ -183,7 +185,10 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testRequestGet() {
-    SrvGetCashOrderRq request = CashOrderAdapter.requestGet(testData.getCashOrder());
+    CashOrderRequest cashOrderRequest = new CashOrderRequest();
+    cashOrderRequest.setCreatedFrom(date(2017, 1, 17, 17, 0));
+    cashOrderRequest.setCreatedTo(date(2017, 5, 17, 17, 0));
+    SrvGetCashOrderRq request = CashOrderAdapter.requestGet(cashOrderRequest);
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertNotNull(request.getSrvGetCashOrderRqMessage());
     Assert.assertEquals(request.getSrvGetCashOrderRqMessage().getCreatedFrom(),
@@ -234,10 +239,10 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testConvertSrvCheckOverLimitRs() {
-    CashOrder cashOrder = CashOrderAdapter.convert(responseLimit);
-    assertHeaderInfo(cashOrder);
-    Assert.assertEquals(cashOrder.getResponseCode(), TestData.RESPONSE_CODE);
-    Assert.assertTrue(cashOrder.isLimitStatus());
+    ExternalEntityContainer<Boolean> container = CashOrderAdapter.convert(responseLimit);
+    assertHeaderInfo(container);
+    Assert.assertEquals(container.getResponseCode(), TestData.RESPONSE_CODE);
+    Assert.assertTrue(container.getData());
   }
 
   @Test

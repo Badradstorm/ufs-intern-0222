@@ -1,6 +1,7 @@
 package ru.philit.ufs.model.converter.esb.asfs;
 
 import ru.philit.ufs.model.converter.esb.mapper.CashOrderMapper;
+import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
 import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq.SrvCheckOverLimitRqMessage;
@@ -19,6 +20,7 @@ import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq.SrvUpdCashOrderRq
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs.SrvUpdCashOrderRsMessage;
 import ru.philit.ufs.model.entity.order.CashOrder;
+import ru.philit.ufs.model.entity.order.CashOrderRequest;
 
 /**
  * Преобразователь между сущностью CashOrder и соответствующим транспортным объектом.
@@ -63,13 +65,13 @@ public class CashOrderAdapter extends AsfsAdapter {
   }
 
   /**
-   * Преобразует транспортный объект SrvCheckOverLimitRs во внутреннюю сущность CashOrder.
+   * Преобразует транспортный объект SrvCheckOverLimitRs в контейнер.
    */
-  public static CashOrder convert(SrvCheckOverLimitRs response) {
+  public static ExternalEntityContainer<Boolean> convert(SrvCheckOverLimitRs response) {
     SrvCheckOverLimitRsMessage messageDto = response.getSrvCheckOverLimitRsMessage();
-    CashOrder cashOrder = mapper.toModel(messageDto);
-    map(response.getHeaderInfo(), cashOrder);
-    return cashOrder;
+    ExternalEntityContainer<Boolean> container = mapper.toModel(messageDto);
+    map(response.getHeaderInfo(), container);
+    return container;
   }
 
   /**
@@ -86,9 +88,9 @@ public class CashOrderAdapter extends AsfsAdapter {
   /**
    * Возвращает объект запроса получения кассового ордера.
    */
-  public static SrvGetCashOrderRq requestGet(CashOrder cashOrder) {
+  public static SrvGetCashOrderRq requestGet(CashOrderRequest cashOrderRequest) {
     SrvGetCashOrderRq request = new SrvGetCashOrderRq();
-    SrvGetCashOrderRqMessage message = mapper.toGetCashOrderRqMessage(cashOrder);
+    SrvGetCashOrderRqMessage message = mapper.toGetCashOrderRqMessage(cashOrderRequest);
     request.setHeaderInfo(headerInfo());
     request.setSrvGetCashOrderRqMessage(message);
     return request;

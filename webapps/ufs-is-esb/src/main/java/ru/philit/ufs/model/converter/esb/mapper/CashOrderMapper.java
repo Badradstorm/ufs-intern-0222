@@ -3,6 +3,7 @@ package ru.philit.ufs.model.converter.esb.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
 import ru.philit.ufs.model.entity.esb.asfs.LimitStatusType;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq.SrvCheckOverLimitRqMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRs;
@@ -14,6 +15,7 @@ import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs.SrvGetCashOrderRsMe
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq.SrvUpdCashOrderRqMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs.SrvUpdCashOrderRsMessage;
 import ru.philit.ufs.model.entity.order.CashOrder;
+import ru.philit.ufs.model.entity.order.CashOrderRequest;
 
 @Mapper(
     uses = {
@@ -42,7 +44,7 @@ public interface CashOrderMapper {
   @Mapping(source = "cashOrder.operator.subbranch.vspCode", target = "additionalInfo.VSPCode")
   SrvCreateCashOrderRqMessage toCreateCashOrderRqMessage(CashOrder cashOrder);
 
-  SrvGetCashOrderRqMessage toGetCashOrderRqMessage(CashOrder cashOrder);
+  SrvGetCashOrderRqMessage toGetCashOrderRqMessage(CashOrderRequest cashOrderRequest);
 
   SrvUpdCashOrderRqMessage toUpdStCashOrderRqMessage(CashOrder cashOrder);
 
@@ -72,6 +74,6 @@ public interface CashOrderMapper {
 
   CashOrder toModel(SrvUpdCashOrderRsMessage messageDto);
 
-  @Mapping(source = "messageDto.status", target = "limitStatus")
-  CashOrder toModel(SrvCheckOverLimitRsMessage messageDto);
+  @Mapping(source = "messageDto.status", target = "data")
+  ExternalEntityContainer<Boolean> toModel(SrvCheckOverLimitRsMessage messageDto);
 }
