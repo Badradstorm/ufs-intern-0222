@@ -43,5 +43,4 @@ public abstract class CommonMockService {
   protected static Date date(XMLGregorianCalendar xmlCalendar) {
     return (xmlCalendar != null) ? xmlCalendar.toGregorianCalendar().getTime() : null;
   }
-
 }

@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.IMap;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -15,18 +19,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.philit.ufs.model.cache.MockCache;
+import ru.philit.ufs.model.converter.esb.mapper.CashOrderStatusMapper;
+import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
 import ru.philit.ufs.model.entity.esb.eks.PkgStatusType;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
+import ru.philit.ufs.model.entity.order.CashOrder;
 
 /**
  * Реализация доступа к кешу мокируемых данных.
@@ -38,6 +47,7 @@ public class HazelcastMockCacheImpl implements MockCache {
 
   private final HazelcastMockServer hazelcastServer;
   private final ObjectMapper jsonMapper;
+  private static final CashOrderStatusMapper cashOrderStatusMapper = CashOrderStatusMapper.INSTANCE;
 
   private Pattern createDatePattern = Pattern.compile("\"createdDttm\":(\\d+)");
 
@@ -85,7 +95,7 @@ public class HazelcastMockCacheImpl implements MockCache {
     if (!collection.containsKey(packageId)) {
       collection.put(packageId, new HashMap<Long, String>());
     }
-    Long realTaskId = taskId == null ? (long)(Math.random() * 1000000) : taskId;
+    Long realTaskId = taskId == null ? (long) (Math.random() * 1000000) : taskId;
     try {
       final Map<Long, String> taskMap = collection.get(packageId);
       String taskJson = jsonMapper.writeValueAsString(taskBody);
@@ -126,7 +136,7 @@ public class HazelcastMockCacheImpl implements MockCache {
   @Override
   public synchronized OperationPackageInfo createPackage(String inn, String workplaceId,
       String userLogin) {
-    Long packageId = (long)(Math.random() * 10000);
+    Long packageId = (long) (Math.random() * 10000);
     OperationPackageInfo packageInfo = new OperationPackageInfo();
     packageInfo.setId(packageId);
     packageInfo.setInn(inn);
@@ -146,8 +156,8 @@ public class HazelcastMockCacheImpl implements MockCache {
 
   @Override
   public Map<Long, List<SrvGetTaskClOperPkgRsMessage.PkgItem.ToCardDeposit.TaskItem>>
-        searchTasksCardDeposit(Long packageId, PkgTaskStatusType taskStatus, Date fromDate,
-        Date toDate, List<Long> taskIds) {
+  searchTasksCardDeposit(Long packageId, PkgTaskStatusType taskStatus, Date fromDate,
+      Date toDate, List<Long> taskIds) {
     Map<Long, List<SrvGetTaskClOperPkgRsMessage.PkgItem.ToCardDeposit.TaskItem>> targetLists =
         new HashMap<>();
     Collection<Long> packageIds = (packageId != null)
@@ -171,6 +181,50 @@ public class HazelcastMockCacheImpl implements MockCache {
       }
     }
     return targetLists;
+  }
+
+  @Override
+  public void saveCashOrder(CashOrder cashOrder) {
+    hazelcastServer.getCashOrderById().put(cashOrder.getCashOrderId(), cashOrder);
+  }
+
+  @Override
+  public List<CashOrder> getCashOrders(Date from, Date to) {
+    return hazelcastServer.getCashOrderById().values().stream()
+        .filter(cashOrder -> cashOrder.getCreatedDttm().after(from)
+            && cashOrder.getCreatedDttm().before(to))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public CashOrder updateCashOrder(String cashOrderId, CashOrderStatusType cashOrderStatus) {
+    CashOrder cashOrder = new CashOrder();
+    Optional<String> optionalId = hazelcastServer.getCashOrderById().keySet().stream().
+        filter(cashOrderId::equals).
+        findFirst();
+    if (optionalId.isPresent()) {
+      cashOrder = hazelcastServer.getCashOrderById().get(optionalId.get());
+      cashOrder.setCashOrderStatus(cashOrderStatusMapper.toModel(cashOrderStatus));
+      cashOrder.setResponseCode("200");
+      cashOrder.setResponseMsg("Ok");
+    } else {
+      cashOrder.setResponseCode("404");
+      cashOrder.setResponseMsg("Not Found");
+    }
+    return cashOrder;
+  }
+
+  @Override
+  public Boolean checkOverLimit(String userLogin, BigDecimal amount, Date requestDate) {
+    Optional<BigDecimal> optional = hazelcastServer.getCashOrderById().values().stream().
+        filter(cashOrder -> userLogin.equals(cashOrder.getUserLogin())).
+        filter(cashOrder -> format(requestDate).equals(format(cashOrder.getCreatedDttm()))).
+        map(CashOrder::getAmount).
+        reduce(BigDecimal::add);
+    BigDecimal limit = new BigDecimal("1000000.0");
+    return optional.
+        map(bigDecimal -> bigDecimal.add(amount).compareTo(limit) <= 0).
+        orElse(true);
   }
 
   private List<String> searchTasks(Map<Long, String> tasks, PkgTaskStatusType taskStatus,
@@ -207,5 +261,16 @@ public class HazelcastMockCacheImpl implements MockCache {
     c.set(Calendar.SECOND, c.getActualMinimum(Calendar.SECOND));
     c.set(Calendar.MILLISECOND, c.getActualMinimum(Calendar.MILLISECOND));
     return c.getTime();
+  }
+
+  private static Date format(Date date) {
+    DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+    Date resultDate = null;
+    try {
+      resultDate = formatter.parse(formatter.format(date));
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+    return resultDate;
   }
 }

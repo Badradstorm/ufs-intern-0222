@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 import ru.philit.ufs.config.property.HazelcastServerProperties;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
+import ru.philit.ufs.model.entity.order.CashOrder;
 
 /**
  * Встроенный сервер распределённого кеша мокируемых данных.
@@ -37,25 +38,37 @@ public class HazelcastMockServer {
   /*
    * Коллекции кешируемых данных. Содержат объекты operationTask в виде json строки.
    * Ключ коллекции - OperationPackageId, OperationTaskId.
+   * Коллекции кешируемых данных. Содержат объекты cashOrder и workplace в виде json строки.
+   * Ключ коллекции - cashOrderId, workplaceId.
    */
-  @Getter private IMap<Long, Map<Long, String>> tasksCardDepositByPackageId;
-  @Getter private IMap<Long, Map<Long, String>> tasksCardWithdrawByPackageId;
-  @Getter private IMap<Long, Map<Long, String>> tasksAccountDepositByPackageId;
-  @Getter private IMap<Long, Map<Long, String>> tasksAccountWithdrawByPackageId;
-  @Getter private IMap<Long, Map<Long, String>> tasksCheckbookIssuingByPackageId;
+  @Getter
+  private IMap<Long, Map<Long, String>> tasksCardDepositByPackageId;
+  @Getter
+  private IMap<Long, Map<Long, String>> tasksCardWithdrawByPackageId;
+  @Getter
+  private IMap<Long, Map<Long, String>> tasksAccountDepositByPackageId;
+  @Getter
+  private IMap<Long, Map<Long, String>> tasksAccountWithdrawByPackageId;
+  @Getter
+  private IMap<Long, Map<Long, String>> tasksCheckbookIssuingByPackageId;
+  @Getter
+  private IMap<String, CashOrder> cashOrderById;
 
   /**
    * Статусы операций, для быстрого доступа.
    */
-  @Getter private IMap<Long, PkgTaskStatusType> taskStatuses;
+  @Getter
+  private IMap<Long, PkgTaskStatusType> taskStatuses;
   /**
    * Данные пакетов операций.
    */
-  @Getter private IMap<Long, OperationPackageInfo> packageById;
+  @Getter
+  private IMap<Long, OperationPackageInfo> packageById;
   /**
    * Пакеты операций по ИНН клиента.
    */
-  @Getter private IMap<String, Long> packageIdByInn;
+  @Getter
+  private IMap<String, Long> packageIdByInn;
 
   /**
    * Конструктор бина.
@@ -100,6 +113,7 @@ public class HazelcastMockServer {
     taskStatuses = instance.getMap("taskStatuses");
     packageById = instance.getMap("packageById");
     packageIdByInn = instance.getMap("packageIdByInn");
+    cashOrderById = instance.getMap("cashOrders");
   }
 
   /**

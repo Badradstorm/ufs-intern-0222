@@ -3,6 +3,10 @@ package ru.philit.ufs.model.cache.hazelcast;
 import static org.mockito.Mockito.when;
 
 import com.hazelcast.core.IMap;
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
@@ -10,9 +14,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
+import ru.philit.ufs.model.entity.order.CashOrder;
+import ru.philit.ufs.model.entity.order.CashOrderStatus;
 
 public class HazelcastMockCacheImplTest {
 
@@ -41,6 +48,7 @@ public class HazelcastMockCacheImplTest {
   private IMap<Long, PkgTaskStatusType> taskStatuses = new MockIMap<>();
   private IMap<Long, OperationPackageInfo> packageById = new MockIMap<>();
   private IMap<String, Long> packageIdByInn = new MockIMap<>();
+  private IMap<String, CashOrder> cashOrderById = new MockIMap<>();
 
   /**
    * Set up test data.
@@ -62,6 +70,7 @@ public class HazelcastMockCacheImplTest {
     when(hazelcastMockServer.getTaskStatuses()).thenReturn(taskStatuses);
     when(hazelcastMockServer.getPackageById()).thenReturn(packageById);
     when(hazelcastMockServer.getPackageIdByInn()).thenReturn(packageIdByInn);
+    when(hazelcastMockServer.getCashOrderById()).thenReturn(cashOrderById);
   }
 
   @Test
@@ -145,5 +154,90 @@ public class HazelcastMockCacheImplTest {
     // then
     Assert.assertNotNull(resultMap);
     Assert.assertTrue(resultMap.isEmpty());
+  }
+
+  @Test
+  public void testSaveCashOrder() {
+    // when
+    CashOrder cashOrder = new CashOrder();
+    cashOrder.setCashOrderId("1");
+    mockCache.saveCashOrder(cashOrder);
+    //then
+    Assert.assertTrue(cashOrderById.containsKey("1"));
+    Assert.assertEquals(cashOrderById.get("1"), cashOrder);
+  }
+
+  @Test
+  public void testGetCashOrders() {
+    // when
+    Date from = new GregorianCalendar(2022, Calendar.MARCH, 7).getTime();
+    Date to = new GregorianCalendar(2022, Calendar.MARCH, 9).getTime();
+    Date createdDate = new GregorianCalendar(2022, Calendar.MARCH, 8).getTime();
+    Date createdDate2 = new GregorianCalendar(2022, Calendar.APRIL, 8).getTime();
+    CashOrder cashOrder = new CashOrder();
+    cashOrder.setCashOrderId("1");
+    cashOrder.setCreatedDttm(createdDate);
+    mockCache.saveCashOrder(cashOrder);
+    CashOrder cashOrder2 = new CashOrder();
+    cashOrder2.setCashOrderId("2");
+    cashOrder2.setCreatedDttm(createdDate2);
+    mockCache.saveCashOrder(cashOrder2);
+    List<CashOrder> resultList = mockCache.getCashOrders(from, to);
+    // then
+    Assert.assertNotNull(resultList);
+    Assert.assertFalse(resultList.isEmpty());
+    Assert.assertEquals(resultList.size(), 1);
+    Assert.assertEquals(resultList.get(0).getCashOrderId(), "1");
+  }
+
+  @Test
+  public void testUpdateCashOrder() {
+    // when
+    CashOrder cashOrder = new CashOrder();
+    cashOrder.setCashOrderId("1");
+    cashOrder.setCashOrderStatus(CashOrderStatus.COMMITTED);
+    mockCache.saveCashOrder(cashOrder);
+    CashOrder result = mockCache.updateCashOrder("1", CashOrderStatusType.CREATED);
+    // then
+    Assert.assertNotNull(result);
+    Assert.assertEquals(result, cashOrder);
+  }
+
+  @Test
+  public void testCheckOverLimit() {
+    // when
+    Date createdDate = new GregorianCalendar(2022, Calendar.MARCH, 8).getTime();
+    Date createdDate2 = new GregorianCalendar(2022, Calendar.MARCH, 9).getTime();
+    CashOrder cashOrder = new CashOrder();
+    cashOrder.setCashOrderId("1");
+    cashOrder.setCreatedDttm(createdDate);
+    cashOrder.setAmount(BigDecimal.valueOf(5000));
+    cashOrder.setUserLogin("Ann");
+    mockCache.saveCashOrder(cashOrder);
+    CashOrder cashOrder2 = new CashOrder();
+    cashOrder2.setCashOrderId("2");
+    cashOrder2.setCreatedDttm(createdDate);
+    cashOrder2.setAmount(BigDecimal.valueOf(10000));
+    cashOrder2.setUserLogin("Ann");
+    mockCache.saveCashOrder(cashOrder2);
+    CashOrder cashOrder3 = new CashOrder();
+    cashOrder3.setCashOrderId("3");
+    cashOrder3.setCreatedDttm(createdDate2);
+    cashOrder3.setAmount(BigDecimal.valueOf(1000000));
+    cashOrder3.setUserLogin("Ann");
+    mockCache.saveCashOrder(cashOrder3);
+    CashOrder cashOrder4 = new CashOrder();
+    cashOrder4.setCashOrderId("4");
+    cashOrder4.setCreatedDttm(createdDate);
+    cashOrder4.setAmount(BigDecimal.valueOf(10000000));
+    cashOrder4.setUserLogin("Ben");
+    mockCache.saveCashOrder(cashOrder4);
+    Boolean result = mockCache.checkOverLimit("Ann", BigDecimal.valueOf(10000), createdDate);
+    Boolean result2 = mockCache.checkOverLimit("Ben", BigDecimal.valueOf(10000), createdDate);
+    // then
+    Assert.assertNotNull(result);
+    Assert.assertNotNull(result2);
+    Assert.assertTrue(result);
+    Assert.assertFalse(result2);
   }
 }
