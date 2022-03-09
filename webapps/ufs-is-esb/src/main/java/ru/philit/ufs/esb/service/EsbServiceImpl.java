@@ -71,7 +71,6 @@ import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderRequest;
 import ru.philit.ufs.model.entity.request.RequestType;
-import ru.philit.ufs.model.entity.user.Workplace;
 
 /**
  * Сервис на маршрутизацию сообщений между Hazelcast и КСШ.
@@ -349,7 +348,7 @@ public class EsbServiceImpl
 
         case RequestType.CREATE_CASH_ORDER:
           if (isCashOrder(entityRequest)) {
-            SrvCreateCashOrderRq request = CashOrderAdapter.requestCreate(
+            SrvCreateCashOrderRq request = CashOrderAdapter.toRequestCreate(
                 (CashOrder) entityRequest.getRequestData());
             isEsbCache.putRequest(request.getHeaderInfo().getRqUID(), entityRequest);
             esbClient.sendMessage(asfsConverter.getXml(request));
@@ -358,7 +357,7 @@ public class EsbServiceImpl
 
         case RequestType.UPDATE_CASH_ORDER:
           if (isCashOrder(entityRequest)) {
-            SrvUpdStCashOrderRq request = CashOrderAdapter.requestUpdate(
+            SrvUpdStCashOrderRq request = CashOrderAdapter.toRequestUpdate(
                 (CashOrder) entityRequest.getRequestData());
             isEsbCache.putRequest(request.getHeaderInfo().getRqUID(), entityRequest);
             esbClient.sendMessage(asfsConverter.getXml(request));
@@ -367,7 +366,7 @@ public class EsbServiceImpl
 
         case RequestType.CASH_ORDER_FROM_DATE_TO_DATE:
           if (isCashOrderRequest(entityRequest)) {
-            SrvGetCashOrderRq request = CashOrderAdapter.requestGet(
+            SrvGetCashOrderRq request = CashOrderAdapter.toRequestGet(
                 (CashOrderRequest) entityRequest.getRequestData());
             isEsbCache.putRequest(request.getHeaderInfo().getRqUID(), entityRequest);
             esbClient.sendMessage(asfsConverter.getXml(request));
@@ -376,7 +375,7 @@ public class EsbServiceImpl
 
         case RequestType.CHECK_OVER_LIMIT:
           if (isCashOrder(entityRequest)) {
-            SrvCheckOverLimitRq request = CashOrderAdapter.requestCheckOverLimit(
+            SrvCheckOverLimitRq request = CashOrderAdapter.toRequestCheckOverLimit(
                 (CashOrder) entityRequest.getRequestData());
             isEsbCache.putRequest(request.getHeaderInfo().getRqUID(), entityRequest);
             esbClient.sendMessage(asfsConverter.getXml(request));
