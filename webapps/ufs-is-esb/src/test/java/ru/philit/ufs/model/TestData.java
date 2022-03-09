@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.Getter;
+import org.junit.Assert;
 import ru.philit.ufs.model.converter.esb.eks.EksAdapterBaseTest;
 import ru.philit.ufs.model.entity.account.Account;
 import ru.philit.ufs.model.entity.account.AccountType;
@@ -17,6 +18,7 @@ import ru.philit.ufs.model.entity.account.AccountancyType;
 import ru.philit.ufs.model.entity.account.IdentityDocument;
 import ru.philit.ufs.model.entity.account.IdentityDocumentType;
 import ru.philit.ufs.model.entity.account.Representative;
+import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.common.ExternalEntityRequest;
 import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
@@ -46,6 +48,7 @@ public class TestData {
   public static final CashOrderType CASH_ORDER_TYPE = CashOrderType.KO_1;
 
   public static final Date CREATED_DTTM = date(2017, 4, 17, 17, 0);
+  public static final XMLGregorianCalendar CREATED_DTTM_XML = xmlCalendar(2017, 4, 17, 17, 0);
   public static final XMLGregorianCalendar CREATED_FROM = xmlCalendar(2017, 1, 17, 17, 0);
   public static final XMLGregorianCalendar CREATED_TO = xmlCalendar(2017, 5, 17, 17, 0);
   public static final String OPERATION_ID = "1254";
@@ -55,8 +58,8 @@ public class TestData {
   public static final String REP_Address = "Москва";
   public static final Date REP_BIRTH_DATE = date(2000, 5, 4, 0, 0);
   public static final XMLGregorianCalendar REP_BIRTH_DATE_XML = xmlCalendar(2000, 5, 4, 0, 0);
-  public static final String REP_PlaceOfBirth = "Мурманск";
-  public static final Boolean REP_Resident = true;
+  public static final String REP_PLACE_OF_BIRTH = "Мурманск";
+  public static final Boolean REP_RESIDENT = true;
   public static final String LEGAL_ENTITY_SHORT_NAME = "UFO";
   public static final String INN = "15445";
 
@@ -156,6 +159,8 @@ public class TestData {
   private SrvAccountByCardNumRs accountResponse;
   @Getter
   private CashOrder cashOrder;
+  @Getter
+  private ExternalEntityList<CashOrder> cashOrders;
 
   /**
    * Конструктор контейнера данных.
@@ -276,8 +281,8 @@ public class TestData {
     cashOrder.getRepresentative().setRepFio(REP_FIO);
     cashOrder.getRepresentative().setAddress(REP_Address);
     cashOrder.getRepresentative().setBirthDate(REP_BIRTH_DATE);
-    cashOrder.getRepresentative().setPlaceOfBirth(REP_PlaceOfBirth);
-    cashOrder.getRepresentative().setResident(REP_Resident);
+    cashOrder.getRepresentative().setPlaceOfBirth(REP_PLACE_OF_BIRTH);
+    cashOrder.getRepresentative().setResident(REP_RESIDENT);
     IdentityDocument identityDocument = new IdentityDocument();
     identityDocument.setType(IdentityDocumentType.PASSPORT);
     identityDocument.setIssuedBy(IDENTITY_DOCUMENT_ISSUED_BY);
@@ -294,5 +299,8 @@ public class TestData {
     cashOrder.getOperator().getSubbranch().setTbCode(SUBBRANCH_TB_CODE);
     cashOrder.setAccount20202Num(ACCOUNT_20202_NUM);
     cashOrder.setTobeIncreased(true);
+
+    cashOrders = new ExternalEntityList<>();
+    cashOrders.getItems().add(cashOrder);
   }
 }

@@ -17,6 +17,7 @@ import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage.AdditionalInfo;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage.RepData;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage.RepData.IdentityDocumentType;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage.CashSymbols;
@@ -37,6 +38,7 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
   private SrvGetCashOrderRs responseGet;
   private SrvUpdStCashOrderRs responseUpdate;
   private SrvCheckOverLimitRs responseLimit;
+  private SrvCreateCashOrderRq requestCreate;
   private TestData testData;
 
   /**
@@ -135,11 +137,52 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
     SrvCheckOverLimitRsMessage messageLimit = responseLimit.getSrvCheckOverLimitRsMessage();
     messageLimit.setResponseCode(TestData.RESPONSE_CODE);
     messageLimit.setStatus(LimitStatusType.LIMIT_PASSED);
+
+    requestCreate = new SrvCreateCashOrderRq();
+    requestCreate.setHeaderInfo(headerInfo());
+    requestCreate.setSrvCreateCashOrderRqMessage(new SrvCreateCashOrderRqMessage());
+
+    SrvCreateCashOrderRqMessage messageRqCreate = requestCreate.getSrvCreateCashOrderRqMessage();
+    messageRqCreate.setCashOrderId(TestData.CASH_ORDER_ID);
+    messageRqCreate.setOperationType(TestData.OPERATION_TYPE);
+    messageRqCreate.setCashOrderINum(TestData.CASH_ORDER_I_NUM);
+    messageRqCreate.setAccountId(TestData.ACCOUNT_ID);
+    messageRqCreate.setAmount(TestData.AMOUNT);
+    messageRqCreate.setAmountInWords(TestData.AMOUNT_IN_WORDS);
+    messageRqCreate.setCurrencyType(TestData.CURRENCY_TYPE);
+    messageRqCreate.setCashOrderStatus(TestData.CASH_ORDER_STATUS);
+    messageRqCreate.setWorkPlaceUId(TestData.WORKPLACE_ID);
+    RepData repData = new RepData();
+    repData.setRepID(TestData.REP_ID);
+    repData.setRepFIO(TestData.REP_FIO);
+    repData.setAddress(TestData.REP_Address);
+    repData.setDateOfBirth(TestData.REP_BIRTH_DATE_XML);
+    repData.setPlaceOfBirth(TestData.REP_PLACE_OF_BIRTH);
+    repData.setResident(TestData.REP_RESIDENT);
+    repData.setINN(TestData.INN);
+    IdentityDocumentType identityDocument = new IdentityDocumentType();
+    identityDocument.setValue(TestData.IDENTITY_DOCUMENT_TYPE);
+    identityDocument.setSeries(TestData.IDENTITY_DOCUMENT_SERIES);
+    identityDocument.setNumber(TestData.IDENTITY_DOCUMENT_NUMBER);
+    identityDocument.setIssuedBy(TestData.IDENTITY_DOCUMENT_ISSUED_BY);
+    identityDocument.setIssuedDate(xmlCalendar(2014, 5, 4, 0, 0));
+    repData.getIdentityDocumentType().add(identityDocument);
+    messageRqCreate.setRepData(repData);
+    AdditionalInfo additionalInfo = new AdditionalInfo();
+    additionalInfo.setComment(TestData.COMMENT);
+    additionalInfo.setSubbranchCode(TestData.SUBBRANCH_CODE);
+    additionalInfo.setVSPCode(TestData.SUBBRANCH_VSP_CODE);
+    additionalInfo.setOSBCode(TestData.SUBBRANCH_OSB_CODE);
+    additionalInfo.setGOSBCode(TestData.SUBBRANCH_GOSB_CODE);
+    additionalInfo.setTBCode(TestData.SUBBRANCH_TB_CODE);
+    additionalInfo.setAccount20202Num(TestData.ACCOUNT_20202_NUM);
+    additionalInfo.setUserLogin(TestData.USER_LOGIN);
+    messageRqCreate.setAdditionalInfo(additionalInfo);
   }
 
   @Test
   public void testRequestCreate() {
-    SrvCreateCashOrderRq request = CashOrderAdapter.requestCreate(testData.getCashOrder());
+    SrvCreateCashOrderRq request = CashOrderAdapter.toRequestCreate(testData.getCashOrder());
     assertHeaderInfo(request.getHeaderInfo());
     SrvCreateCashOrderRqMessage message = request.getSrvCreateCashOrderRqMessage();
     List<RepData.IdentityDocumentType> identityDocuments = message.getRepData()
@@ -160,7 +203,7 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
     Assert.assertEquals(message.getRepData().getRepFIO(), TestData.REP_FIO);
     Assert.assertEquals(message.getRepData().getAddress(), TestData.REP_Address);
     Assert.assertEquals(message.getRepData().getDateOfBirth(), TestData.REP_BIRTH_DATE_XML);
-    Assert.assertEquals(message.getRepData().getPlaceOfBirth(), TestData.REP_PlaceOfBirth);
+    Assert.assertEquals(message.getRepData().getPlaceOfBirth(), TestData.REP_PLACE_OF_BIRTH);
     Assert.assertTrue(message.getRepData().isResident());
     Assert.assertEquals(message.getRepData().getINN(), TestData.INN);
     Assert.assertEquals(identityDocuments.get(0).getValue(), TestData.IDENTITY_DOCUMENT_TYPE);
@@ -188,7 +231,7 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
     CashOrderRequest cashOrderRequest = new CashOrderRequest();
     cashOrderRequest.setCreatedFrom(date(2017, 1, 17, 17, 0));
     cashOrderRequest.setCreatedTo(date(2017, 5, 17, 17, 0));
-    SrvGetCashOrderRq request = CashOrderAdapter.requestGet(cashOrderRequest);
+    SrvGetCashOrderRq request = CashOrderAdapter.toRequestGet(cashOrderRequest);
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertNotNull(request.getSrvGetCashOrderRqMessage());
     Assert.assertEquals(request.getSrvGetCashOrderRqMessage().getCreatedFrom(),
@@ -198,7 +241,7 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testRequestUpdate() {
-    SrvUpdStCashOrderRq request = CashOrderAdapter.requestUpdate(testData.getCashOrder());
+    SrvUpdStCashOrderRq request = CashOrderAdapter.toRequestUpdate(testData.getCashOrder());
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertNotNull(request.getSrvUpdCashOrderRqMessage());
     Assert.assertEquals(request.getSrvUpdCashOrderRqMessage().getCashOrderId(),
@@ -209,7 +252,7 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testRequestCheckOverLimit() {
-    SrvCheckOverLimitRq request = CashOrderAdapter.requestCheckOverLimit(testData.getCashOrder());
+    SrvCheckOverLimitRq request = CashOrderAdapter.toRequestCheckOverLimit(testData.getCashOrder());
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getAmount(), TestData.AMOUNT);
     Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getUserLogin(),
@@ -218,9 +261,93 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
   }
 
   @Test
+  public void testResponseCreate() {
+    SrvCreateCashOrderRs response = CashOrderAdapter.toResponseCreate(testData.getCashOrder());
+    assertHeaderInfo(response.getHeaderInfo());
+    SrvCreateCashOrderRsMessage message = response.getSrvCreateCashOrderRsMessage();
+    Assert.assertNotNull(message);
+    Assert.assertEquals(message.getResponseCode(), TestData.RESPONSE_CODE);
+    Assert.assertEquals(message.getResponseMsg(), TestData.RESPONSE_MESSAGE);
+    Assert.assertEquals(message.getCashOrderId(), TestData.CASH_ORDER_ID);
+    Assert.assertEquals(message.getCashOrderINum(), TestData.CASH_ORDER_I_NUM);
+    Assert.assertEquals(message.getCashOrderStatus(), TestData.CASH_ORDER_STATUS);
+    Assert.assertEquals(message.getCashOrderType(), TestData.CASH_ORDER_TYPE);
+    Assert.assertEquals(message.getCreatedDttm(), TestData.CREATED_DTTM_XML);
+    Assert.assertEquals(message.getOperationId(), TestData.OPERATION_ID);
+    Assert.assertEquals(message.getRepFIO(), TestData.REP_FIO);
+    Assert.assertEquals(message.getLegalEntityShortName(), TestData.LEGAL_ENTITY_SHORT_NAME);
+    Assert.assertEquals(message.getINN(), TestData.INN);
+    Assert.assertEquals(message.getAmount(), TestData.AMOUNT);
+    Assert.assertEquals(message.getAccountId(), TestData.ACCOUNT_ID);
+    Assert.assertEquals(message.getSenderBank(), TestData.SENDER_BANK);
+    Assert.assertEquals(message.getSenderBankBIC(), TestData.SENDER_BANK_BIC);
+    Assert.assertEquals(message.getRecipientBank(), TestData.RECIPIENT_BANK);
+    Assert.assertEquals(message.getRecipientBankBIC(), TestData.RECIPIENT_BANK_BIC);
+    Assert.assertTrue(message.isClientTypeFK());
+    Assert.assertEquals(message.getFDestLEName(), TestData.F_DEST_LE_NAME);
+    Assert.assertEquals(message.getSubbranchCode(), TestData.SUBBRANCH_CODE);
+    Assert.assertEquals(message.getUserLogin(), TestData.USER_LOGIN);
+    Assert.assertEquals(message.getUserFullName(), TestData.USER_FULLNAME);
+    Assert.assertEquals(message.getUserPosition(), TestData.USER_POSITION);
+    Assert.assertEquals(message.getCashSymbols().getCashSymbolItem().get(0).getCashSymbol(),
+        TestData.CASH_SYMBOL);
+    Assert.assertEquals(message.getCashSymbols().getCashSymbolItem().get(0).getCashSymbolAmount(),
+        TestData.CASH_SYMBOL_AMOUNT);
+  }
+
+  @Test
+  public void testResponseUpdate() {
+    SrvUpdStCashOrderRs response = CashOrderAdapter.toResponseUpdate(testData.getCashOrder());
+    assertHeaderInfo(response.getHeaderInfo());
+    SrvUpdCashOrderRsMessage message = response.getSrvUpdCashOrderRsMessage();
+    Assert.assertNotNull(message);
+    Assert.assertEquals(message.getResponseCode(), TestData.RESPONSE_CODE);
+    Assert.assertEquals(message.getResponseMsg(), TestData.RESPONSE_MESSAGE);
+    Assert.assertEquals(message.getCashOrderId(), TestData.CASH_ORDER_ID);
+    Assert.assertEquals(message.getCashOrderINum(), TestData.CASH_ORDER_I_NUM);
+    Assert.assertEquals(message.getCashOrderStatus(), TestData.CASH_ORDER_STATUS);
+    Assert.assertEquals(message.getCashOrderType(), TestData.CASH_ORDER_TYPE);
+  }
+
+  @Test
+  public void testResponseGet() {
+    SrvGetCashOrderRs response = CashOrderAdapter.toResponseGet(testData.getCashOrders());
+    assertHeaderInfo(response.getHeaderInfo());
+    CashOrderItem item = response.getSrvGetCashOrderRsMessage().getCashOrderItem().get(0);
+    Assert.assertNotNull(item);
+    Assert.assertEquals(item.getResponseCode(), TestData.RESPONSE_CODE);
+    Assert.assertEquals(item.getResponseMsg(), TestData.RESPONSE_MESSAGE);
+    Assert.assertEquals(item.getCashOrderId(), TestData.CASH_ORDER_ID);
+    Assert.assertEquals(item.getCashOrderINum(), TestData.CASH_ORDER_I_NUM);
+    Assert.assertEquals(item.getCashOrderStatus(), TestData.CASH_ORDER_STATUS);
+    Assert.assertEquals(item.getCashOrderType(), TestData.CASH_ORDER_TYPE);
+    Assert.assertEquals(item.getCreatedDttm(), TestData.CREATED_DTTM_XML);
+    Assert.assertEquals(item.getOperationId(), TestData.OPERATION_ID);
+    Assert.assertEquals(item.getRepFIO(), TestData.REP_FIO);
+    Assert.assertEquals(item.getLegalEntityShortName(), TestData.LEGAL_ENTITY_SHORT_NAME);
+    Assert.assertEquals(item.getINN(), TestData.INN);
+    Assert.assertEquals(item.getAmount(), TestData.AMOUNT);
+    Assert.assertEquals(item.getAccountId(), TestData.ACCOUNT_ID);
+    Assert.assertEquals(item.getSenderBank(), TestData.SENDER_BANK);
+    Assert.assertEquals(item.getSenderBankBIC(), TestData.SENDER_BANK_BIC);
+    Assert.assertEquals(item.getRecipientBank(), TestData.RECIPIENT_BANK);
+    Assert.assertEquals(item.getRecipientBankBIC(), TestData.RECIPIENT_BANK_BIC);
+    Assert.assertTrue(item.isClientTypeFK());
+    Assert.assertEquals(item.getFDestLEName(), TestData.F_DEST_LE_NAME);
+    Assert.assertEquals(item.getSubbranchCode(), TestData.SUBBRANCH_CODE);
+    Assert.assertEquals(item.getUserLogin(), TestData.USER_LOGIN);
+    Assert.assertEquals(item.getUserFullName(), TestData.USER_FULLNAME);
+    Assert.assertEquals(item.getUserPosition(), TestData.USER_POSITION);
+    Assert.assertEquals(item.getCashSymbols().getCashSymbolItem().get(0).getCashSymbol(),
+        TestData.CASH_SYMBOL);
+    Assert.assertEquals(item.getCashSymbols().getCashSymbolItem().get(0).getCashSymbolAmount(),
+        TestData.CASH_SYMBOL_AMOUNT);
+  }
+
+  @Test
   public void testConvertSrvCreateCashOrderRs() {
     CashOrder cashOrder = CashOrderAdapter.convert(responseCreate);
-    testCashOrder(cashOrder);
+    testCreateGetCashOrderRq(cashOrder);
   }
 
   @Test
@@ -228,13 +355,13 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
     ExternalEntityList<CashOrder> cashOrders = CashOrderAdapter.convert(responseGet);
     assertHeaderInfo(cashOrders);
     Assert.assertEquals(cashOrders.getItems().size(), 1);
-    testCashOrder(cashOrders.getItems().get(0));
+    testCreateGetCashOrderRq(cashOrders.getItems().get(0));
   }
 
   @Test
   public void testConvertSrvUpdStCashOrderRs() {
     CashOrder cashOrder = CashOrderAdapter.convert(responseUpdate);
-    testCashOrderResponse(cashOrder);
+    testCreateGetCashOrderRs(cashOrder);
   }
 
   @Test
@@ -243,6 +370,13 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
     assertHeaderInfo(container);
     Assert.assertEquals(container.getResponseCode(), TestData.RESPONSE_CODE);
     Assert.assertTrue(container.getData());
+  }
+
+  @Test
+  public void testConvertSrvCheckOverLimitRq() {
+    CashOrder cashOrder = CashOrderAdapter.convert(requestCreate);
+    assertHeaderInfo(cashOrder);
+    testOverLimitCashOrderRq(cashOrder);
   }
 
   @Test
@@ -264,11 +398,11 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
 
     ExternalEntity externalEntityCheckOverLimit = MultiAdapter.convert(responseLimit);
     Assert.assertNotNull(externalEntityCheckOverLimit);
-    Assert.assertEquals(externalEntityCheckOverLimit.getClass(), CashOrder.class);
+    Assert.assertEquals(externalEntityCheckOverLimit.getClass(), ExternalEntityContainer.class);
   }
 
-  private void testCashOrder(CashOrder cashOrder) {
-    testCashOrderResponse(cashOrder);
+  private void testCreateGetCashOrderRq(CashOrder cashOrder) {
+    testCreateGetCashOrderRs(cashOrder);
     Assert.assertEquals(cashOrder.getCreatedDttm(), TestData.CREATED_DTTM);
     Assert.assertEquals(cashOrder.getOperationId(), TestData.OPERATION_ID);
     Assert.assertEquals(cashOrder.getRepresentative().getRepFio(), TestData.REP_FIO);
@@ -291,7 +425,7 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
     Assert.assertEquals(cashOrder.getUserPosition(), TestData.USER_POSITION);
   }
 
-  private void testCashOrderResponse(CashOrder cashOrder) {
+  private void testCreateGetCashOrderRs(CashOrder cashOrder) {
     assertHeaderInfo(cashOrder);
     Assert.assertEquals(cashOrder.getResponseCode(), TestData.RESPONSE_CODE);
     Assert.assertEquals(cashOrder.getResponseMsg(), TestData.RESPONSE_MESSAGE);
@@ -299,5 +433,45 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
     Assert.assertEquals(cashOrder.getCashOrderINum(), TestData.CASH_ORDER_I_NUM);
     Assert.assertEquals(cashOrder.getCashOrderStatus().value(), TestData.CASH_ORDER_STATUS.value());
     Assert.assertEquals(cashOrder.getCashOrderType().value(), TestData.CASH_ORDER_TYPE.value());
+  }
+
+  private void testOverLimitCashOrderRq(CashOrder cashOrder) {
+    Assert.assertEquals(cashOrder.getCashOrderId(), TestData.CASH_ORDER_ID);
+    Assert.assertEquals(cashOrder.getCashOrderINum(), TestData.CASH_ORDER_I_NUM);
+    Assert.assertEquals(cashOrder.getCashOrderStatus().value(), TestData.CASH_ORDER_STATUS.value());
+    Assert.assertEquals(cashOrder.getAccountId(), TestData.ACCOUNT_ID);
+    Assert.assertEquals(cashOrder.getAmount(), TestData.AMOUNT);
+    Assert.assertEquals(cashOrder.getAmountInWords(), TestData.AMOUNT_IN_WORDS);
+    Assert.assertEquals(cashOrder.getCurrencyType(), TestData.CURRENCY_TYPE);
+    Assert.assertEquals(cashOrder.getOperator().getWorkplaceId(), TestData.WORKPLACE_ID);
+    Assert.assertEquals(cashOrder.getRepresentative().getId(), TestData.REP_ID);
+    Assert.assertEquals(cashOrder.getRepresentative().getRepFio(), TestData.REP_FIO);
+    Assert.assertEquals(cashOrder.getRepresentative().getAddress(), TestData.REP_Address);
+    Assert.assertEquals(cashOrder.getRepresentative().getBirthDate(), TestData.REP_BIRTH_DATE);
+    Assert.assertEquals(cashOrder.getRepresentative().getPlaceOfBirth(),
+        TestData.REP_PLACE_OF_BIRTH);
+    Assert.assertEquals(cashOrder.getRepresentative().isResident(), TestData.REP_RESIDENT);
+    Assert.assertEquals(cashOrder.getRepresentative().getInn(), TestData.INN);
+    Assert.assertEquals(cashOrder.getRepresentative().getIdentityDocuments().get(0).getType(),
+        ru.philit.ufs.model.entity.account.IdentityDocumentType.PASSPORT);
+    Assert.assertEquals(cashOrder.getRepresentative().getIdentityDocuments().get(0).getSeries(),
+        TestData.IDENTITY_DOCUMENT_SERIES);
+    Assert.assertEquals(cashOrder.getRepresentative().getIdentityDocuments().get(0).getNumber(),
+        TestData.IDENTITY_DOCUMENT_NUMBER);
+    Assert.assertEquals(cashOrder.getRepresentative().getIdentityDocuments().get(0).getIssuedBy(),
+        TestData.IDENTITY_DOCUMENT_ISSUED_BY);
+    Assert.assertEquals(cashOrder.getComment(), TestData.COMMENT);
+    Assert.assertEquals(cashOrder.getOperator().getSubbranch().getSubbranchCode(),
+        TestData.SUBBRANCH_CODE);
+    Assert.assertEquals(cashOrder.getOperator().getSubbranch().getVspCode(),
+        TestData.SUBBRANCH_VSP_CODE);
+    Assert.assertEquals(cashOrder.getOperator().getSubbranch().getOsbCode(),
+        TestData.SUBBRANCH_OSB_CODE);
+    Assert.assertEquals(cashOrder.getOperator().getSubbranch().getGosbCode(),
+        TestData.SUBBRANCH_GOSB_CODE);
+    Assert.assertEquals(cashOrder.getOperator().getSubbranch().getTbCode(),
+        TestData.SUBBRANCH_TB_CODE);
+    Assert.assertEquals(cashOrder.getAccount20202Num(), TestData.ACCOUNT_20202_NUM);
+    Assert.assertEquals(cashOrder.getUserLogin(), TestData.USER_LOGIN);
   }
 }
