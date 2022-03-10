@@ -4,13 +4,14 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
+import javax.xml.datatype.XMLGregorianCalendar;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq;
+import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
+import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage.PkgItem;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
-import ru.philit.ufs.model.entity.order.CashOrder;
-import ru.philit.ufs.model.entity.order.CashOrderStatus;
-import ru.philit.ufs.model.entity.user.Workplace;
 
 /**
  * Кеш данных Mock приложения.
@@ -35,15 +36,15 @@ public interface MockCache {
 
   OperationPackageInfo getPackageInfo(Long packageId);
 
-  Map<Long, List<SrvGetTaskClOperPkgRsMessage.PkgItem.ToCardDeposit.TaskItem>>
-        searchTasksCardDeposit(Long packageId, PkgTaskStatusType taskStatus, Date fromDate,
-        Date toDate, List<Long> taskIds);
+  Map<Long, List<PkgItem.ToCardDeposit.TaskItem>> searchTasksCardDeposit(
+      Long packageId, PkgTaskStatusType taskStatus, Date fromDate, Date toDate, List<Long> taskIds);
 
-  void saveCashOrder(CashOrder cashOrder);
+  void saveCashOrder(SrvCreateCashOrderRs cashOrder);
 
-  List<CashOrder> getCashOrders(Date createdFrom, Date createdTo);
+  List<SrvCreateCashOrderRs> getCashOrders(XMLGregorianCalendar createdFrom,
+      XMLGregorianCalendar createdTo);
 
-  CashOrder updateCashOrder(String cashOrderId, CashOrderStatusType cashOrderStatus);
+  SrvUpdStCashOrderRs updateCashOrder(SrvUpdStCashOrderRq request);
 
-  Boolean checkOverLimit(String userLogin, BigDecimal amount, Date requestDate);
+  Boolean checkOverLimit(String userLogin, BigDecimal amount, XMLGregorianCalendar requestDate);
 }

@@ -44,14 +44,9 @@ public class AsfsMockServiceTest {
     String requestMessage = "<SrvUpdStCashOrderRq><HeaderInfo/>"
         + "<SrvUpdCashOrderRqMessage>"
         + "<cashOrderId>1</cashOrderId>"
+        + "<cashOrderStatus>Committed</cashOrderStatus>"
         + "</SrvUpdCashOrderRqMessage>"
         + "</SrvUpdStCashOrderRq>";
-    String requestCreate = "<SrvCreateCashOrderRq><HeaderInfo/>"
-        + "<SrvCreateCashOrderRqMessage>"
-        + "<cashOrderId>1</cashOrderId>"
-        + "</SrvCreateCashOrderRqMessage>"
-        + "</SrvCreateCashOrderRq>";
-    service.processMessage(requestCreate);
     assertTrue(service.processMessage(requestMessage));
   }
 
@@ -63,12 +58,6 @@ public class AsfsMockServiceTest {
         + "<createdTo>2022-03-07T15:13:44.991+03:00</createdTo>"
         + "</SrvGetCashOrderRqMessage>"
         + "</SrvGetCashOrderRq>";
-    String requestCreate = "<SrvCreateCashOrderRq><HeaderInfo/>"
-        + "<SrvCreateCashOrderRqMessage>"
-        + "<cashOrderId>1</cashOrderId>"
-        + "</SrvCreateCashOrderRqMessage>"
-        + "</SrvCreateCashOrderRq>";
-    service.processMessage(requestCreate);
     assertTrue(service.processMessage(requestMessage));
   }
 

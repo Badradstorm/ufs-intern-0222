@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.philit.ufs.config.property.HazelcastServerProperties;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
-import ru.philit.ufs.model.entity.order.CashOrder;
 
 /**
  * Встроенный сервер распределённого кеша мокируемых данных.
@@ -38,8 +38,8 @@ public class HazelcastMockServer {
   /*
    * Коллекции кешируемых данных. Содержат объекты operationTask в виде json строки.
    * Ключ коллекции - OperationPackageId, OperationTaskId.
-   * Коллекции кешируемых данных. Содержат объекты cashOrder и workplace в виде json строки.
-   * Ключ коллекции - cashOrderId, workplaceId.
+   * Коллекции кешируемых данных. Содержат объекты SrvCreateCashOrderRs.
+   * Ключ коллекции - cashOrderId.
    */
   @Getter
   private IMap<Long, Map<Long, String>> tasksCardDepositByPackageId;
@@ -52,7 +52,7 @@ public class HazelcastMockServer {
   @Getter
   private IMap<Long, Map<Long, String>> tasksCheckbookIssuingByPackageId;
   @Getter
-  private IMap<String, CashOrder> cashOrderById;
+  private IMap<String, SrvCreateCashOrderRs> cashOrderById;
 
   /**
    * Статусы операций, для быстрого доступа.

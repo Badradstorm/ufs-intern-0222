@@ -5,21 +5,27 @@ import static org.mockito.Mockito.when;
 import com.hazelcast.core.IMap;
 import java.math.BigDecimal;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
+import ru.philit.ufs.model.entity.esb.asfs.CashOrderType;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage;
+import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq;
+import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq.SrvUpdCashOrderRqMessage;
+import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
-import ru.philit.ufs.model.entity.order.CashOrder;
-import ru.philit.ufs.model.entity.order.CashOrderStatus;
 
 public class HazelcastMockCacheImplTest {
 
@@ -48,7 +54,7 @@ public class HazelcastMockCacheImplTest {
   private IMap<Long, PkgTaskStatusType> taskStatuses = new MockIMap<>();
   private IMap<Long, OperationPackageInfo> packageById = new MockIMap<>();
   private IMap<String, Long> packageIdByInn = new MockIMap<>();
-  private IMap<String, CashOrder> cashOrderById = new MockIMap<>();
+  private IMap<String, SrvCreateCashOrderRs> cashOrderById = new MockIMap<>();
 
   /**
    * Set up test data.
@@ -131,7 +137,8 @@ public class HazelcastMockCacheImplTest {
     Assert.assertNull(packageId);
 
     // when
-    OperationPackageInfo packageInfo = mockCache.createPackage(INN, "12345", "Sidorov_SS");
+    OperationPackageInfo packageInfo = mockCache.createPackage(
+        INN, "12345", "Sidorov_SS");
     // then
     Assert.assertNotNull(packageInfo.getId());
 
@@ -141,7 +148,8 @@ public class HazelcastMockCacheImplTest {
     Assert.assertEquals(packageInfo.getId(), packageId2);
 
     // when
-    OperationPackageInfo packageInfo2 = mockCache.createPackage(INN, "12345", "Sidorov_SS");
+    OperationPackageInfo packageInfo2 = mockCache.createPackage(
+        INN, "12345", "Sidorov_SS");
     // then
     Assert.assertNotEquals(packageInfo.getId(), packageInfo2.getId());
   }
@@ -150,7 +158,8 @@ public class HazelcastMockCacheImplTest {
   public void testSearchTaskCardDeposit() {
     // when
     Map<Long, List<SrvGetTaskClOperPkgRsMessage.PkgItem.ToCardDeposit.TaskItem>> resultMap =
-        mockCache.searchTasksCardDeposit(null, null, null, null, null);
+        mockCache.searchTasksCardDeposit(null, null,
+            null, null, null);
     // then
     Assert.assertNotNull(resultMap);
     Assert.assertTrue(resultMap.isEmpty());
@@ -159,8 +168,9 @@ public class HazelcastMockCacheImplTest {
   @Test
   public void testSaveCashOrder() {
     // when
-    CashOrder cashOrder = new CashOrder();
-    cashOrder.setCashOrderId("1");
+    SrvCreateCashOrderRs cashOrder = new SrvCreateCashOrderRs();
+    cashOrder.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRsMessage());
+    cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderId("1");
     mockCache.saveCashOrder(cashOrder);
     //then
     Assert.assertTrue(cashOrderById.containsKey("1"));
@@ -168,76 +178,107 @@ public class HazelcastMockCacheImplTest {
   }
 
   @Test
-  public void testGetCashOrders() {
+  public void testGetCashOrders() throws DatatypeConfigurationException {
     // when
-    Date from = new GregorianCalendar(2022, Calendar.MARCH, 7).getTime();
-    Date to = new GregorianCalendar(2022, Calendar.MARCH, 9).getTime();
-    Date createdDate = new GregorianCalendar(2022, Calendar.MARCH, 8).getTime();
-    Date createdDate2 = new GregorianCalendar(2022, Calendar.APRIL, 8).getTime();
-    CashOrder cashOrder = new CashOrder();
-    cashOrder.setCashOrderId("1");
-    cashOrder.setCreatedDttm(createdDate);
+    SrvCreateCashOrderRs cashOrder = new SrvCreateCashOrderRs();
+    cashOrder.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRsMessage());
+    cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderId("1");
+    cashOrder.getSrvCreateCashOrderRsMessage().setCreatedDttm(xmlCalendar(2022, Calendar.MARCH, 8));
     mockCache.saveCashOrder(cashOrder);
-    CashOrder cashOrder2 = new CashOrder();
-    cashOrder2.setCashOrderId("2");
-    cashOrder2.setCreatedDttm(createdDate2);
+    SrvCreateCashOrderRs cashOrder2 = new SrvCreateCashOrderRs();
+    cashOrder2.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRsMessage());
+    cashOrder2.getSrvCreateCashOrderRsMessage().setCashOrderId("2");
+    cashOrder2.getSrvCreateCashOrderRsMessage()
+        .setCreatedDttm(xmlCalendar(2022, Calendar.APRIL, 8));
     mockCache.saveCashOrder(cashOrder2);
-    List<CashOrder> resultList = mockCache.getCashOrders(from, to);
+    List<SrvCreateCashOrderRs> result = mockCache.getCashOrders(
+        xmlCalendar(2022, Calendar.MARCH, 7),
+        xmlCalendar(2022, Calendar.MARCH, 9));
     // then
-    Assert.assertNotNull(resultList);
-    Assert.assertFalse(resultList.isEmpty());
-    Assert.assertEquals(resultList.size(), 1);
-    Assert.assertEquals(resultList.get(0).getCashOrderId(), "1");
+    Assert.assertNotNull(result);
+    Assert.assertFalse(result.isEmpty());
+    Assert.assertEquals(result.size(), 1);
+    Assert.assertEquals(result.get(0).getSrvCreateCashOrderRsMessage().getCashOrderId(), "1");
   }
 
   @Test
   public void testUpdateCashOrder() {
     // when
-    CashOrder cashOrder = new CashOrder();
-    cashOrder.setCashOrderId("1");
-    cashOrder.setCashOrderStatus(CashOrderStatus.COMMITTED);
+    SrvCreateCashOrderRs cashOrder = new SrvCreateCashOrderRs();
+    cashOrder.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRsMessage());
+    cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderId("1");
+    cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderStatus(CashOrderStatusType.COMMITTED);
+    cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderType(CashOrderType.KO_1);
+    cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderINum("111");
     mockCache.saveCashOrder(cashOrder);
-    CashOrder result = mockCache.updateCashOrder("1", CashOrderStatusType.CREATED);
+    SrvUpdStCashOrderRq request = new SrvUpdStCashOrderRq();
+    request.setSrvUpdCashOrderRqMessage(new SrvUpdCashOrderRqMessage());
+    request.getSrvUpdCashOrderRqMessage().setCashOrderId("1");
+    request.getSrvUpdCashOrderRqMessage().setCashOrderStatus(CashOrderStatusType.CREATED);
+    SrvUpdStCashOrderRs result = mockCache.updateCashOrder(request);
     // then
     Assert.assertNotNull(result);
-    Assert.assertEquals(result, cashOrder);
+    Assert.assertEquals(result.getSrvUpdCashOrderRsMessage().getCashOrderId(),
+        cashOrder.getSrvCreateCashOrderRsMessage().getCashOrderId());
+    Assert.assertEquals(result.getSrvUpdCashOrderRsMessage().getCashOrderINum(),
+        cashOrder.getSrvCreateCashOrderRsMessage().getCashOrderINum());
+    Assert.assertEquals(result.getSrvUpdCashOrderRsMessage().getCashOrderStatus(),
+        CashOrderStatusType.CREATED);
+    Assert.assertEquals(result.getSrvUpdCashOrderRsMessage().getCashOrderType(),
+        cashOrder.getSrvCreateCashOrderRsMessage().getCashOrderType());
   }
 
   @Test
   public void testCheckOverLimit() {
     // when
-    Date createdDate = new GregorianCalendar(2022, Calendar.MARCH, 8).getTime();
-    Date createdDate2 = new GregorianCalendar(2022, Calendar.MARCH, 9).getTime();
-    CashOrder cashOrder = new CashOrder();
-    cashOrder.setCashOrderId("1");
-    cashOrder.setCreatedDttm(createdDate);
-    cashOrder.setAmount(BigDecimal.valueOf(5000));
-    cashOrder.setUserLogin("Ann");
+    XMLGregorianCalendar createdDate = xmlCalendar(2022, Calendar.MARCH, 8);
+    SrvCreateCashOrderRs cashOrder = new SrvCreateCashOrderRs();
+    cashOrder.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRsMessage());
+    cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderId("1");
+    cashOrder.getSrvCreateCashOrderRsMessage().setCreatedDttm(createdDate);
+    cashOrder.getSrvCreateCashOrderRsMessage().setAmount(BigDecimal.valueOf(5000));
+    cashOrder.getSrvCreateCashOrderRsMessage().setUserLogin("Ann");
     mockCache.saveCashOrder(cashOrder);
-    CashOrder cashOrder2 = new CashOrder();
-    cashOrder2.setCashOrderId("2");
-    cashOrder2.setCreatedDttm(createdDate);
-    cashOrder2.setAmount(BigDecimal.valueOf(10000));
-    cashOrder2.setUserLogin("Ann");
+    SrvCreateCashOrderRs cashOrder2 = new SrvCreateCashOrderRs();
+    cashOrder2.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRsMessage());
+    cashOrder2.getSrvCreateCashOrderRsMessage().setCashOrderId("2");
+    cashOrder2.getSrvCreateCashOrderRsMessage().setCreatedDttm(createdDate);
+    cashOrder2.getSrvCreateCashOrderRsMessage().setAmount(BigDecimal.valueOf(10000));
+    cashOrder2.getSrvCreateCashOrderRsMessage().setUserLogin("Ann");
     mockCache.saveCashOrder(cashOrder2);
-    CashOrder cashOrder3 = new CashOrder();
-    cashOrder3.setCashOrderId("3");
-    cashOrder3.setCreatedDttm(createdDate2);
-    cashOrder3.setAmount(BigDecimal.valueOf(1000000));
-    cashOrder3.setUserLogin("Ann");
+    SrvCreateCashOrderRs cashOrder3 = new SrvCreateCashOrderRs();
+    cashOrder3.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRsMessage());
+    cashOrder3.getSrvCreateCashOrderRsMessage().setCashOrderId("3");
+    cashOrder3.getSrvCreateCashOrderRsMessage()
+        .setCreatedDttm(xmlCalendar(2022, Calendar.MARCH, 9));
+    cashOrder3.getSrvCreateCashOrderRsMessage().setAmount(BigDecimal.valueOf(1000000));
+    cashOrder3.getSrvCreateCashOrderRsMessage().setUserLogin("Ann");
     mockCache.saveCashOrder(cashOrder3);
-    CashOrder cashOrder4 = new CashOrder();
-    cashOrder4.setCashOrderId("4");
-    cashOrder4.setCreatedDttm(createdDate);
-    cashOrder4.setAmount(BigDecimal.valueOf(10000000));
-    cashOrder4.setUserLogin("Ben");
+    SrvCreateCashOrderRs cashOrder4 = new SrvCreateCashOrderRs();
+    cashOrder4.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRsMessage());
+    cashOrder4.getSrvCreateCashOrderRsMessage().setCashOrderId("4");
+    cashOrder4.getSrvCreateCashOrderRsMessage().setCreatedDttm(createdDate);
+    cashOrder4.getSrvCreateCashOrderRsMessage().setAmount(BigDecimal.valueOf(10000000));
+    cashOrder4.getSrvCreateCashOrderRsMessage().setUserLogin("Ben");
     mockCache.saveCashOrder(cashOrder4);
-    Boolean result = mockCache.checkOverLimit("Ann", BigDecimal.valueOf(10000), createdDate);
-    Boolean result2 = mockCache.checkOverLimit("Ben", BigDecimal.valueOf(10000), createdDate);
+    Boolean result = mockCache.checkOverLimit("Ann",
+        BigDecimal.valueOf(10000), createdDate);
+    Boolean result2 = mockCache.checkOverLimit("Ben",
+        BigDecimal.valueOf(10000), createdDate);
     // then
     Assert.assertNotNull(result);
     Assert.assertNotNull(result2);
     Assert.assertTrue(result);
     Assert.assertFalse(result2);
+  }
+
+  protected static XMLGregorianCalendar xmlCalendar(int year, int month, int day) {
+    try {
+      return DatatypeFactory.newInstance()
+          .newXMLGregorianCalendar(new GregorianCalendar(year, month, day));
+    } catch (DatatypeConfigurationException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 }

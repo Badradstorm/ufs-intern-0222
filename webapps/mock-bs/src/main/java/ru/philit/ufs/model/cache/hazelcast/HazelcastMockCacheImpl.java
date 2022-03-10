@@ -23,19 +23,22 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.philit.ufs.model.cache.MockCache;
-import ru.philit.ufs.model.converter.esb.mapper.CashOrderStatusMapper;
-import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq;
+import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs.SrvUpdCashOrderRsMessage;
 import ru.philit.ufs.model.entity.esb.eks.PkgStatusType;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
+import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage.PkgItem;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
-import ru.philit.ufs.model.entity.order.CashOrder;
 
 /**
  * Реализация доступа к кешу мокируемых данных.
@@ -47,7 +50,6 @@ public class HazelcastMockCacheImpl implements MockCache {
 
   private final HazelcastMockServer hazelcastServer;
   private final ObjectMapper jsonMapper;
-  private static final CashOrderStatusMapper cashOrderStatusMapper = CashOrderStatusMapper.INSTANCE;
 
   private Pattern createDatePattern = Pattern.compile("\"createdDttm\":(\\d+)");
 
@@ -155,11 +157,9 @@ public class HazelcastMockCacheImpl implements MockCache {
   }
 
   @Override
-  public Map<Long, List<SrvGetTaskClOperPkgRsMessage.PkgItem.ToCardDeposit.TaskItem>>
-  searchTasksCardDeposit(Long packageId, PkgTaskStatusType taskStatus, Date fromDate,
-      Date toDate, List<Long> taskIds) {
-    Map<Long, List<SrvGetTaskClOperPkgRsMessage.PkgItem.ToCardDeposit.TaskItem>> targetLists =
-        new HashMap<>();
+  public Map<Long, List<PkgItem.ToCardDeposit.TaskItem>> searchTasksCardDeposit(Long packageId,
+      PkgTaskStatusType taskStatus, Date fromDate, Date toDate, List<Long> taskIds) {
+    Map<Long, List<PkgItem.ToCardDeposit.TaskItem>> targetLists = new HashMap<>();
     Collection<Long> packageIds = (packageId != null)
         ? Collections.singletonList(packageId)
         : hazelcastServer.getTasksCardDepositByPackageId().keySet();
@@ -184,47 +184,68 @@ public class HazelcastMockCacheImpl implements MockCache {
   }
 
   @Override
-  public void saveCashOrder(CashOrder cashOrder) {
-    hazelcastServer.getCashOrderById().put(cashOrder.getCashOrderId(), cashOrder);
+  public void saveCashOrder(SrvCreateCashOrderRs cashOrder) {
+    hazelcastServer.getCashOrderById()
+        .put(cashOrder.getSrvCreateCashOrderRsMessage().getCashOrderId(), cashOrder);
   }
 
   @Override
-  public List<CashOrder> getCashOrders(Date from, Date to) {
-    return hazelcastServer.getCashOrderById().values().stream()
-        .filter(cashOrder -> cashOrder.getCreatedDttm().after(from)
-            && cashOrder.getCreatedDttm().before(to))
+  public List<SrvCreateCashOrderRs> getCashOrders(XMLGregorianCalendar from,
+      XMLGregorianCalendar to) {
+    return hazelcastServer.getCashOrderById().values()
+        .stream()
+        .filter(cashOrder ->
+            cashOrder.getSrvCreateCashOrderRsMessage().getCreatedDttm().toGregorianCalendar()
+                .after(from.toGregorianCalendar())
+                && cashOrder.getSrvCreateCashOrderRsMessage().getCreatedDttm().toGregorianCalendar()
+                .before(to.toGregorianCalendar()))
         .collect(Collectors.toList());
   }
 
   @Override
-  public CashOrder updateCashOrder(String cashOrderId, CashOrderStatusType cashOrderStatus) {
-    CashOrder cashOrder = new CashOrder();
-    Optional<String> optionalId = hazelcastServer.getCashOrderById().keySet().stream().
-        filter(cashOrderId::equals).
-        findFirst();
+  public SrvUpdStCashOrderRs updateCashOrder(SrvUpdStCashOrderRq request) {
+    SrvUpdStCashOrderRs cashOrder = new SrvUpdStCashOrderRs();
+    cashOrder.setSrvUpdCashOrderRsMessage(new SrvUpdCashOrderRsMessage());
+    Optional<String> optionalId = hazelcastServer.getCashOrderById().keySet().stream()
+        .filter(request.getSrvUpdCashOrderRqMessage().getCashOrderId()::equals).findFirst();
     if (optionalId.isPresent()) {
-      cashOrder = hazelcastServer.getCashOrderById().get(optionalId.get());
-      cashOrder.setCashOrderStatus(cashOrderStatusMapper.toModel(cashOrderStatus));
-      cashOrder.setResponseCode("200");
-      cashOrder.setResponseMsg("Ok");
+      SrvCreateCashOrderRs cashedCashOrder = hazelcastServer.getCashOrderById()
+          .get(optionalId.get());
+      cashedCashOrder.getSrvCreateCashOrderRsMessage()
+          .setCashOrderStatus(request.getSrvUpdCashOrderRqMessage()
+              .getCashOrderStatus());
+      cashOrder.getSrvUpdCashOrderRsMessage()
+          .setCashOrderId(cashedCashOrder.getSrvCreateCashOrderRsMessage().getCashOrderId());
+      cashOrder.getSrvUpdCashOrderRsMessage().setResponseCode("200");
+      cashOrder.getSrvUpdCashOrderRsMessage().setResponseMsg("ok");
+      cashOrder.getSrvUpdCashOrderRsMessage()
+          .setCashOrderType(cashedCashOrder.getSrvCreateCashOrderRsMessage()
+              .getCashOrderType());
+      cashOrder.getSrvUpdCashOrderRsMessage()
+          .setCashOrderINum(cashedCashOrder.getSrvCreateCashOrderRsMessage().getCashOrderINum());
+      cashOrder.getSrvUpdCashOrderRsMessage()
+          .setCashOrderStatus(cashedCashOrder.getSrvCreateCashOrderRsMessage()
+              .getCashOrderStatus());
     } else {
-      cashOrder.setResponseCode("404");
-      cashOrder.setResponseMsg("Not Found");
+      cashOrder.getSrvUpdCashOrderRsMessage().setResponseCode("404");
+      cashOrder.getSrvUpdCashOrderRsMessage().setResponseMsg("Not Found");
     }
     return cashOrder;
   }
 
   @Override
-  public Boolean checkOverLimit(String userLogin, BigDecimal amount, Date requestDate) {
-    Optional<BigDecimal> optional = hazelcastServer.getCashOrderById().values().stream().
-        filter(cashOrder -> userLogin.equals(cashOrder.getUserLogin())).
-        filter(cashOrder -> format(requestDate).equals(format(cashOrder.getCreatedDttm()))).
-        map(CashOrder::getAmount).
-        reduce(BigDecimal::add);
+  public Boolean checkOverLimit(String userLogin, BigDecimal amount,
+      XMLGregorianCalendar requestDate) {
+    Optional<BigDecimal> optional = hazelcastServer.getCashOrderById().values().stream()
+        .filter(cashOrder -> userLogin.equals(
+            cashOrder.getSrvCreateCashOrderRsMessage().getUserLogin()))
+        .filter(cashOrder -> format(requestDate.toGregorianCalendar().getTime()).equals(format(
+            cashOrder.getSrvCreateCashOrderRsMessage().getCreatedDttm().toGregorianCalendar()
+                .getTime())))
+        .map(cashOrderRs -> cashOrderRs.getSrvCreateCashOrderRsMessage().getAmount())
+        .reduce(BigDecimal::add);
     BigDecimal limit = new BigDecimal("1000000.0");
-    return optional.
-        map(bigDecimal -> bigDecimal.add(amount).compareTo(limit) <= 0).
-        orElse(true);
+    return optional.map(bigDecimal -> bigDecimal.add(amount).compareTo(limit) <= 0).orElse(true);
   }
 
   private List<String> searchTasks(Map<Long, String> tasks, PkgTaskStatusType taskStatus,
