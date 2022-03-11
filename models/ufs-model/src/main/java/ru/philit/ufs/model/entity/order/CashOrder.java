@@ -49,7 +49,6 @@ public class CashOrder extends ExternalEntity {
   private String userLogin; // Логин оператора
   private String userPosition; // Должность кассового работника
   private String legalEntityShortName;
-  private boolean tobeIncreased;
 
   /**
    * Конструктор кассового ордера.

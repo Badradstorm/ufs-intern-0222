@@ -298,7 +298,6 @@ public class TestData {
     cashOrder.getOperator().getSubbranch().setGosbCode(SUBBRANCH_GOSB_CODE);
     cashOrder.getOperator().getSubbranch().setTbCode(SUBBRANCH_TB_CODE);
     cashOrder.setAccount20202Num(ACCOUNT_20202_NUM);
-    cashOrder.setTobeIncreased(true);
 
     cashOrders = new ExternalEntityList<>();
     cashOrders.getItems().add(cashOrder);

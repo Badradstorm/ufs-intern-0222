@@ -10,7 +10,4 @@ public interface IdentityDocumentMapper {
 
   @Mapping(source = "identityDocument.type", target = "value")
   IdentityDocumentType toDto(IdentityDocument identityDocument);
-
-  @Mapping(source = "identityDocumentType.value", target = "type")
-  IdentityDocument toModel(IdentityDocumentType identityDocumentType);
 }
