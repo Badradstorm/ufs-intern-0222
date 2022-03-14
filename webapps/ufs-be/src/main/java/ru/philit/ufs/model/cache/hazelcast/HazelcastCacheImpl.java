@@ -8,6 +8,7 @@ import static ru.philit.ufs.model.entity.request.RequestType.ADD_OPER_TASK;
 import static ru.philit.ufs.model.entity.request.RequestType.CARD_INDEX_ELEMENTS_BY_ACCOUNT;
 import static ru.philit.ufs.model.entity.request.RequestType.CASH_SYMBOL;
 import static ru.philit.ufs.model.entity.request.RequestType.CHECK_OPER_PACKAGE;
+import static ru.philit.ufs.model.entity.request.RequestType.CHECK_OVER_LIMIT;
 import static ru.philit.ufs.model.entity.request.RequestType.COUNT_COMMISSION;
 import static ru.philit.ufs.model.entity.request.RequestType.CREATE_OPER_PACKAGE;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OPER_TASKS;
@@ -21,6 +22,7 @@ import static ru.philit.ufs.model.entity.request.RequestType.OPER_TYPES_BY_ROLE;
 import static ru.philit.ufs.model.entity.request.RequestType.SEARCH_REPRESENTATIVE;
 import static ru.philit.ufs.model.entity.request.RequestType.SEIZURES_BY_ACCOUNT;
 import static ru.philit.ufs.model.entity.request.RequestType.UPDATE_OPER_TASK;
+import static ru.philit.ufs.model.entity.request.RequestType.WORKPLACE_BY_ID;
 
 import com.google.common.collect.Iterables;
 import com.hazelcast.core.IMap;
@@ -31,10 +33,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.philit.ufs.model.cache.AccountCache;
 import ru.philit.ufs.model.cache.AnnouncementCache;
+import ru.philit.ufs.model.cache.CashOrderCache;
 import ru.philit.ufs.model.cache.OperationCache;
 import ru.philit.ufs.model.cache.OperationTypeCache;
 import ru.philit.ufs.model.cache.RepresentativeCache;
 import ru.philit.ufs.model.cache.UserCache;
+import ru.philit.ufs.model.cache.WorkplaceCache;
 import ru.philit.ufs.model.entity.account.Account;
 import ru.philit.ufs.model.entity.account.AccountOperationRequest;
 import ru.philit.ufs.model.entity.account.AccountResidues;
@@ -56,9 +60,11 @@ import ru.philit.ufs.model.entity.oper.OperationType;
 import ru.philit.ufs.model.entity.oper.OperationTypeFavourite;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
+import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.User;
+import ru.philit.ufs.model.entity.user.Workplace;
 import ru.philit.ufs.service.AuditService;
 import ru.philit.ufs.web.exception.UserNotFoundException;
 
@@ -68,7 +74,7 @@ import ru.philit.ufs.web.exception.UserNotFoundException;
 @Service
 public class HazelcastCacheImpl
     implements AccountCache, AnnouncementCache, OperationCache, OperationTypeCache,
-    RepresentativeCache, UserCache {
+    RepresentativeCache, UserCache, WorkplaceCache, CashOrderCache {
 
   private final HazelcastBeClient client;
   private final AuditService auditService;
@@ -282,6 +288,19 @@ public class HazelcastCacheImpl
     return requestData(
         request, client.getRepresentativeMap(), SEARCH_REPRESENTATIVE, clientInfo
     );
+  }
+
+  @Override
+  public Workplace getWorkplace(String workplaceId, ClientInfo clientInfo) {
+    return requestDataFromExternal(
+        workplaceId, client.getWorkplaceByIdMap(), WORKPLACE_BY_ID, clientInfo);
+  }
+
+  @Override
+  public boolean checkOverLimit(BigDecimal amount, ClientInfo clientInfo) {
+    ExternalEntityContainer<Boolean> container = requestDataFromExternal(
+        amount, client.getCheckOverLimitMap(), CHECK_OVER_LIMIT, clientInfo);
+    return container.getData();
   }
 
   private <K extends Serializable, V> V requestData(
