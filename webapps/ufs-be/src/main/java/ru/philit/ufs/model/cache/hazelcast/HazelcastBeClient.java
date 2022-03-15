@@ -153,7 +153,7 @@ public class HazelcastBeClient {
   @Getter
   private IMap<LocalKey<CashOrderRequest>, List<CashOrder>> cashOrderFromDateToDateMap;
   @Getter
-  private IMap<LocalKey<BigDecimal>, ExternalEntityContainer<Boolean>> checkOverLimitMap;
+  private IMap<LocalKey<CashOrder>, ExternalEntityContainer<Boolean>> checkOverLimitMap;
   @Getter
   private IMap<LocalKey<CashOrder>, CashOrder> cashOrderResponseMap;
 

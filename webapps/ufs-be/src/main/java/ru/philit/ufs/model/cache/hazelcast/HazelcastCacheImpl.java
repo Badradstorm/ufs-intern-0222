@@ -298,8 +298,11 @@ public class HazelcastCacheImpl
 
   @Override
   public boolean checkOverLimit(BigDecimal amount, ClientInfo clientInfo) {
+    CashOrder cashOrderCheckLimit = new CashOrder();
+    cashOrderCheckLimit.setAmount(amount);
+    cashOrderCheckLimit.setUserLogin(clientInfo.getUser().getLogin());
     ExternalEntityContainer<Boolean> container = requestDataFromExternal(
-        amount, client.getCheckOverLimitMap(), CHECK_OVER_LIMIT, clientInfo);
+        cashOrderCheckLimit, client.getCheckOverLimitMap(), CHECK_OVER_LIMIT, clientInfo);
     return container.getData();
   }
 
