@@ -328,7 +328,7 @@ public class ResponseListener
       case RequestType.CHECK_OVER_LIMIT:
         if (entity instanceof ExternalEntityContainer) {
           hazelcastServer.getCheckOverLimitMap().put(
-              new LocalKey<>(request.getSessionId(), (CashOrder) request.getRequestData()),
+              new LocalKey<>(request.getSessionId(), (String) request.getRequestData()),
               (ExternalEntityContainer<Boolean>) entity);
         }
         break;
