@@ -236,16 +236,17 @@ public class HazelcastMockCacheImpl implements MockCache {
   @Override
   public Boolean checkOverLimit(String userLogin, BigDecimal amount,
       XMLGregorianCalendar requestDate) {
-    Optional<BigDecimal> optional = hazelcastServer.getCashOrderById().values().stream()
+    BigDecimal result = hazelcastServer.getCashOrderById().values().stream()
         .filter(cashOrder -> userLogin.equals(
             cashOrder.getSrvCreateCashOrderRsMessage().getUserLogin()))
         .filter(cashOrder -> format(requestDate.toGregorianCalendar().getTime()).equals(format(
             cashOrder.getSrvCreateCashOrderRsMessage().getCreatedDttm().toGregorianCalendar()
                 .getTime())))
         .map(cashOrderRs -> cashOrderRs.getSrvCreateCashOrderRsMessage().getAmount())
-        .reduce(BigDecimal::add);
+        .reduce(BigDecimal::add)
+        .orElse(BigDecimal.valueOf(0));
     BigDecimal limit = new BigDecimal("1000000.0");
-    return optional.map(bigDecimal -> bigDecimal.add(amount).compareTo(limit) <= 0).orElse(true);
+    return result.add(amount).compareTo(limit) <= 0;
   }
 
   private List<String> searchTasks(Map<Long, String> tasks, PkgTaskStatusType taskStatus,
