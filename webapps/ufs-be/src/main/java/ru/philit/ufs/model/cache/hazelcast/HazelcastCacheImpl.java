@@ -6,10 +6,12 @@ import static ru.philit.ufs.model.entity.request.RequestType.ACCOUNT_BY_CARD_NUM
 import static ru.philit.ufs.model.entity.request.RequestType.ACCOUNT_RESIDUES_BY_ID;
 import static ru.philit.ufs.model.entity.request.RequestType.ADD_OPER_TASK;
 import static ru.philit.ufs.model.entity.request.RequestType.CARD_INDEX_ELEMENTS_BY_ACCOUNT;
+import static ru.philit.ufs.model.entity.request.RequestType.CASH_ORDER_FROM_DATE_TO_DATE;
 import static ru.philit.ufs.model.entity.request.RequestType.CASH_SYMBOL;
 import static ru.philit.ufs.model.entity.request.RequestType.CHECK_OPER_PACKAGE;
 import static ru.philit.ufs.model.entity.request.RequestType.CHECK_OVER_LIMIT;
 import static ru.philit.ufs.model.entity.request.RequestType.COUNT_COMMISSION;
+import static ru.philit.ufs.model.entity.request.RequestType.CREATE_CASH_ORDER;
 import static ru.philit.ufs.model.entity.request.RequestType.CREATE_OPER_PACKAGE;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OPER_TASKS;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OVN;
@@ -21,6 +23,7 @@ import static ru.philit.ufs.model.entity.request.RequestType.OPERATOR_BY_USER;
 import static ru.philit.ufs.model.entity.request.RequestType.OPER_TYPES_BY_ROLE;
 import static ru.philit.ufs.model.entity.request.RequestType.SEARCH_REPRESENTATIVE;
 import static ru.philit.ufs.model.entity.request.RequestType.SEIZURES_BY_ACCOUNT;
+import static ru.philit.ufs.model.entity.request.RequestType.UPDATE_CASH_ORDER;
 import static ru.philit.ufs.model.entity.request.RequestType.UPDATE_OPER_TASK;
 import static ru.philit.ufs.model.entity.request.RequestType.WORKPLACE_BY_ID;
 
@@ -61,6 +64,7 @@ import ru.philit.ufs.model.entity.oper.OperationTypeFavourite;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
 import ru.philit.ufs.model.entity.order.CashOrder;
+import ru.philit.ufs.model.entity.order.CashOrderRequest;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.User;
@@ -304,6 +308,26 @@ public class HazelcastCacheImpl
     ExternalEntityContainer<Boolean> container = requestDataFromExternal(
         cashOrderCheckLimit, client.getCheckOverLimitMap(), CHECK_OVER_LIMIT, clientInfo);
     return container.getData();
+  }
+
+  @Override
+  public CashOrder saveCashOrder(CashOrder cashOrder, ClientInfo clientInfo) {
+    return requestDataFromExternal(
+        cashOrder, client.getCashOrderResponseMap(), CREATE_CASH_ORDER, clientInfo);
+  }
+
+  @Override
+  public CashOrder updateCashOrder(CashOrder cashOrder, ClientInfo clientInfo) {
+    return requestDataFromExternal(
+        cashOrder, client.getCashOrderResponseMap(), UPDATE_CASH_ORDER, clientInfo);
+  }
+
+  @Override
+  public List<CashOrder> getCashOrders(CashOrderRequest cashOrderRequest,
+      ClientInfo clientInfo) {
+    return requestDataFromExternal(
+        cashOrderRequest, client.getCashOrderFromDateToDateMap(), CASH_ORDER_FROM_DATE_TO_DATE,
+        clientInfo);
   }
 
   private <K extends Serializable, V> V requestData(

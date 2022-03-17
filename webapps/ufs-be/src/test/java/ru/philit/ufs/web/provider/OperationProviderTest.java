@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import ru.philit.ufs.model.cache.CashOrderCache;
 import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.cache.OperationCache;
 import ru.philit.ufs.model.cache.mock.MockCacheImpl;
@@ -28,7 +29,9 @@ import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
 import ru.philit.ufs.model.entity.oper.OperationTask;
 import ru.philit.ufs.model.entity.oper.OperationTaskCardDeposit;
+import ru.philit.ufs.model.entity.oper.OperationTaskDeposit;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
+import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.User;
 import ru.philit.ufs.web.exception.InvalidDataException;
@@ -60,13 +63,15 @@ public class OperationProviderTest {
   private MockCache mockCache = new MockCacheImpl();
   @Mock
   private RepresentativeProvider representativeProvider;
+  @Mock
+  private CashOrderProvider cashOrderProvider;
 
   private OperationProvider provider;
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    provider = new OperationProvider(representativeProvider, cache, mockCache);
+    provider = new OperationProvider(representativeProvider, cache, mockCache, cashOrderProvider);
   }
 
   @Test
@@ -156,29 +161,32 @@ public class OperationProviderTest {
   @Test
   public void testConfirmOperation() throws Exception {
     // given
-    OperationTask task1 = new OperationTask();
+    OperationTaskCardDeposit task1 = new OperationTaskCardDeposit();
     task1.setId(TASK_ID - 1);
-    OperationTask task2 = new OperationTask();
+    OperationTaskCardDeposit task2 = new OperationTaskCardDeposit();
     task2.setId(TASK_ID);
     OperationPackage opPackage = new OperationPackage();
     opPackage.setToCardDeposits(Arrays.asList(task1, task2));
+    CashOrder cashOrder = new CashOrder();
+    cashOrder.setCashOrderId("1");
 
     // when
     when(cache.getTasksInPackage(any(OperationTasksRequest.class), any(ClientInfo.class)))
         .thenReturn(opPackage);
     when(cache.updateTasksInPackage(any(OperationPackage.class), any(ClientInfo.class)))
         .thenReturn(opPackage);
+    when(cashOrderProvider.createCashOrder(any(OperationTaskDeposit.class), any(ClientInfo.class),
+        any(String.class))).thenReturn(cashOrder);
     doNothing().when(cache)
         .addOperation(anyLong(), any(Operation.class));
     provider.confirmOperation(PACKAGE_ID, TASK_ID, WORKPLACE_ID, TYPE_CODE, CLIENT_INFO);
 
     // verify
-    verify(cache, times(1))
-        .getTasksInPackage(any(OperationTasksRequest.class), any(ClientInfo.class));
-    verify(cache, times(1))
-        .updateTasksInPackage(any(OperationPackage.class), any(ClientInfo.class));
-    verify(cache, times(1))
-        .addOperation(anyLong(), any(Operation.class));
+    verify(cache).getTasksInPackage(any(OperationTasksRequest.class), any(ClientInfo.class));
+    verify(cache).updateTasksInPackage(any(OperationPackage.class), any(ClientInfo.class));
+    verify(cashOrderProvider).createCashOrder(any(OperationTaskDeposit.class),
+        any(ClientInfo.class), any(String.class));
+    verify(cache).addOperation(anyLong(), any(Operation.class));
     verifyNoMoreInteractions(cache);
   }
 

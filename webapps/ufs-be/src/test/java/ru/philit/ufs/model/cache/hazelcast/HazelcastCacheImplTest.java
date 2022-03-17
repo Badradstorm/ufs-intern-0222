@@ -45,10 +45,13 @@ import ru.philit.ufs.model.entity.oper.OperationType;
 import ru.philit.ufs.model.entity.oper.OperationTypeFavourite;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
+import ru.philit.ufs.model.entity.order.CashOrder;
+import ru.philit.ufs.model.entity.order.CashOrderRequest;
 import ru.philit.ufs.model.entity.request.RequestType;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.User;
+import ru.philit.ufs.model.entity.user.Workplace;
 import ru.philit.ufs.service.AuditService;
 import ru.philit.ufs.web.exception.UserNotFoundException;
 
@@ -95,6 +98,12 @@ public class HazelcastCacheImplTest {
   private final IMap<LocalKey<String>, Representative> representativeByCardNumberMap =
       new MockIMap<>();
   private final IMap<LocalKey<String>, Operator> operatorByUserMap = new MockIMap<>();
+  private final IMap<LocalKey<String>, Workplace> workplaceByIdMap = new MockIMap<>();
+  private final IMap<LocalKey<CashOrderRequest>, List<CashOrder>> cashOrderFromDateToDateMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<CashOrder>, ExternalEntityContainer<Boolean>> checkOverLimitMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<CashOrder>, CashOrder> cashOrderResponseMap = new MockIMap<>();
 
   @Mock
   private HazelcastBeClient client;
@@ -131,6 +140,10 @@ public class HazelcastCacheImplTest {
     when(client.getRepresentativeMap()).thenReturn(representativeMap);
     when(client.getRepresentativeByCardNumberMap()).thenReturn(representativeByCardNumberMap);
     when(client.getOperatorByUserMap()).thenReturn(operatorByUserMap);
+    when(client.getCheckOverLimitMap()).thenReturn(checkOverLimitMap);
+    when(client.getCashOrderResponseMap()).thenReturn(cashOrderResponseMap);
+    when(client.getCashOrderFromDateToDateMap()).thenReturn(cashOrderFromDateToDateMap);
+    when(client.getWorkplaceByIdMap()).thenReturn(workplaceByIdMap);
 
     doAnswer(new Answer() {
       @Override
@@ -190,6 +203,19 @@ public class HazelcastCacheImplTest {
           case RequestType.OPERATOR_BY_USER:
             operatorByUserMap.put(key, new Operator());
             break;
+          case RequestType.CREATE_CASH_ORDER:
+          case RequestType.UPDATE_CASH_ORDER:
+            cashOrderResponseMap.put(key, new CashOrder());
+            break;
+          case RequestType.CASH_ORDER_FROM_DATE_TO_DATE:
+            cashOrderFromDateToDateMap.put(key, new ArrayList<CashOrder>());
+            break;
+          case RequestType.CHECK_OVER_LIMIT:
+            checkOverLimitMap.put(key, new ExternalEntityContainer<>(true));
+            break;
+          case RequestType.WORKPLACE_BY_ID:
+            workplaceByIdMap.put(key, new Workplace());
+            break;
           default:
         }
         return null;
@@ -225,6 +251,11 @@ public class HazelcastCacheImplTest {
     assertNotNull(cache.getRepresentativesByCriteria(new RepresentativeRequest("1"), CLIENT_INFO));
     assertNotNull(cache.getCashSymbols(new CashSymbolRequest(), CLIENT_INFO));
     assertNotNull(cache.getOperator("1", CLIENT_INFO));
+    assertNotNull(cache.getWorkplace("1", CLIENT_INFO));
+    assertNotNull(cache.saveCashOrder(new CashOrder(), CLIENT_INFO));
+    assertNotNull(cache.getCashOrders(new CashOrderRequest(), CLIENT_INFO));
+    assertNotNull(cache.updateCashOrder(new CashOrder(), CLIENT_INFO));
+    assertTrue(cache.checkOverLimit(new BigDecimal(1), CLIENT_INFO));
 
     Operation operation = new Operation();
     operation.setId(OPERATION_ID);

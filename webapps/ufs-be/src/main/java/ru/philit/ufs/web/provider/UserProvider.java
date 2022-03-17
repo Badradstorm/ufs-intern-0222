@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import ru.philit.ufs.model.cache.CashOrderCache;
 import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.cache.UserCache;
 import ru.philit.ufs.model.cache.WorkplaceCache;
@@ -27,15 +26,16 @@ public class UserProvider {
   private final UserCache userCache;
   private final MockCache mockCache;
   private final WorkplaceCache workplaceCache;
-  private final CashOrderCache cashOrderCache;
 
+  /**
+   * Конструктор бина.
+   */
   @Autowired
   public UserProvider(UserCache userCache, MockCache mockCache,
-      WorkplaceCache workplaceCache, CashOrderCache cashOrderCache) {
+      WorkplaceCache workplaceCache) {
     this.userCache = userCache;
     this.mockCache = mockCache;
     this.workplaceCache = workplaceCache;
-    this.cashOrderCache = cashOrderCache;
   }
 
   /**
@@ -119,7 +119,7 @@ public class UserProvider {
     if (workplace.getAmount() == null) {
       throw new InvalidDataException("Отсутствует общий остаток по кассе");
     }
-    if (!cashOrderCache.checkOverLimit(workplace.getAmount(), clientInfo)) {
+    if (!workplaceCache.checkOverLimit(workplace.getAmount(), clientInfo)) {
       throw new InvalidDataException("Превышен лимит общего остатка по кассе");
     }
     return workplace;
@@ -140,7 +140,7 @@ public class UserProvider {
     if (workplace.getAmount() == null) {
       throw new InvalidDataException("Отсутствует общий остаток по кассе");
     }
-    if (!cashOrderCache.checkOverLimit(amount.add(workplace.getAmount()), clientInfo)) {
+    if (!workplaceCache.checkOverLimit(amount.add(workplace.getAmount()), clientInfo)) {
       throw new InvalidDataException("Превышен лимит общего остатка по кассе");
     }
   }

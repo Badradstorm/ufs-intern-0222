@@ -19,7 +19,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import ru.philit.ufs.model.cache.CashOrderCache;
 import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.cache.UserCache;
 import ru.philit.ufs.model.cache.WorkplaceCache;
@@ -57,8 +56,6 @@ public class UserProviderTest {
   private UserCache cache;
   @Mock
   private WorkplaceCache workplaceCache;
-  @Mock
-  private CashOrderCache cashOrderCache;
   @Spy
   private MockCache mockCache = new MockCacheImpl();
 
@@ -67,7 +64,7 @@ public class UserProviderTest {
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    provider = new UserProvider(cache, mockCache, workplaceCache, cashOrderCache);
+    provider = new UserProvider(cache, mockCache, workplaceCache);
   }
 
   @Test
@@ -152,7 +149,8 @@ public class UserProviderTest {
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
     when(workplaceCache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
-    when(cashOrderCache.checkOverLimit(any(BigDecimal.class), any(ClientInfo.class))).thenReturn(true);
+    when(workplaceCache.checkOverLimit(any(BigDecimal.class), any(ClientInfo.class))).thenReturn(
+        true);
     provider.getWorkplace(CLIENT_INFO);
 
     // verify
@@ -224,7 +222,8 @@ public class UserProviderTest {
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
     when(workplaceCache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
-    when(cashOrderCache.checkOverLimit(any(BigDecimal.class), any(ClientInfo.class))).thenReturn(false);
+    when(workplaceCache.checkOverLimit(any(BigDecimal.class), any(ClientInfo.class))).thenReturn(
+        false);
     provider.getWorkplace(CLIENT_INFO);
   }
 
@@ -238,7 +237,8 @@ public class UserProviderTest {
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
     when(workplaceCache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
-    when(cashOrderCache.checkOverLimit(any(BigDecimal.class), any(ClientInfo.class))).thenReturn(true);
+    when(workplaceCache.checkOverLimit(any(BigDecimal.class), any(ClientInfo.class))).thenReturn(
+        true);
     provider.checkWorkplaceIncreasedAmount(AMOUNT, CLIENT_INFO);
 
     // verify
