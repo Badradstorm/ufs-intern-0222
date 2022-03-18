@@ -131,8 +131,7 @@ public class HazelcastMockCacheImpl implements MockCache {
 
   @Override
   public Long checkPackage(String inn) {
-    return hazelcastServer.getPackageIdByInn().containsKey(inn)
-        ? hazelcastServer.getPackageIdByInn().get(inn) : null;
+    return hazelcastServer.getPackageIdByInn().getOrDefault(inn, null);
   }
 
   @Override
@@ -204,33 +203,36 @@ public class HazelcastMockCacheImpl implements MockCache {
 
   @Override
   public SrvUpdStCashOrderRs updateCashOrder(SrvUpdStCashOrderRq request) {
-    SrvUpdStCashOrderRs cashOrder = new SrvUpdStCashOrderRs();
-    cashOrder.setSrvUpdCashOrderRsMessage(new SrvUpdCashOrderRsMessage());
+    SrvUpdStCashOrderRs updatedCashOrder = new SrvUpdStCashOrderRs();
+    updatedCashOrder.setSrvUpdCashOrderRsMessage(new SrvUpdCashOrderRsMessage());
     Optional<String> optionalId = hazelcastServer.getCashOrderById().keySet().stream()
         .filter(request.getSrvUpdCashOrderRqMessage().getCashOrderId()::equals).findFirst();
     if (optionalId.isPresent()) {
-      SrvCreateCashOrderRs cashedCashOrder = hazelcastServer.getCashOrderById()
+      SrvCreateCashOrderRs cashOrderFromCache = hazelcastServer.getCashOrderById()
           .get(optionalId.get());
-      cashedCashOrder.getSrvCreateCashOrderRsMessage()
+      cashOrderFromCache.getSrvCreateCashOrderRsMessage()
           .setCashOrderStatus(request.getSrvUpdCashOrderRqMessage()
               .getCashOrderStatus());
-      cashOrder.getSrvUpdCashOrderRsMessage()
-          .setCashOrderId(cashedCashOrder.getSrvCreateCashOrderRsMessage().getCashOrderId());
-      cashOrder.getSrvUpdCashOrderRsMessage().setResponseCode("200");
-      cashOrder.getSrvUpdCashOrderRsMessage().setResponseMsg("ok");
-      cashOrder.getSrvUpdCashOrderRsMessage()
-          .setCashOrderType(cashedCashOrder.getSrvCreateCashOrderRsMessage()
+      updatedCashOrder.getSrvUpdCashOrderRsMessage()
+          .setCashOrderId(cashOrderFromCache.getSrvCreateCashOrderRsMessage().getCashOrderId());
+      updatedCashOrder.getSrvUpdCashOrderRsMessage().setResponseCode("200");
+      cashOrderFromCache.getSrvCreateCashOrderRsMessage().setResponseCode("200");
+      updatedCashOrder.getSrvUpdCashOrderRsMessage().setResponseMsg("ok");
+      cashOrderFromCache.getSrvCreateCashOrderRsMessage().setResponseMsg("ok");
+      updatedCashOrder.getSrvUpdCashOrderRsMessage()
+          .setCashOrderType(cashOrderFromCache.getSrvCreateCashOrderRsMessage()
               .getCashOrderType());
-      cashOrder.getSrvUpdCashOrderRsMessage()
-          .setCashOrderINum(cashedCashOrder.getSrvCreateCashOrderRsMessage().getCashOrderINum());
-      cashOrder.getSrvUpdCashOrderRsMessage()
-          .setCashOrderStatus(cashedCashOrder.getSrvCreateCashOrderRsMessage()
+      updatedCashOrder.getSrvUpdCashOrderRsMessage()
+          .setCashOrderINum(cashOrderFromCache.getSrvCreateCashOrderRsMessage().getCashOrderINum());
+      updatedCashOrder.getSrvUpdCashOrderRsMessage()
+          .setCashOrderStatus(cashOrderFromCache.getSrvCreateCashOrderRsMessage()
               .getCashOrderStatus());
+      saveCashOrder(cashOrderFromCache);
     } else {
-      cashOrder.getSrvUpdCashOrderRsMessage().setResponseCode("404");
-      cashOrder.getSrvUpdCashOrderRsMessage().setResponseMsg("Not Found");
+      updatedCashOrder.getSrvUpdCashOrderRsMessage().setResponseCode("404");
+      updatedCashOrder.getSrvUpdCashOrderRsMessage().setResponseMsg("Not Found");
     }
-    return cashOrder;
+    return updatedCashOrder;
   }
 
   @Override
