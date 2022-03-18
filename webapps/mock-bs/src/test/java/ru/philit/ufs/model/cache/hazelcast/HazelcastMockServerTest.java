@@ -43,7 +43,7 @@ public class HazelcastMockServerTest {
     Assert.assertNotNull(hazelcastMockServer.getTaskStatuses());
     Assert.assertNotNull(hazelcastMockServer.getPackageById());
     Assert.assertNotNull(hazelcastMockServer.getPackageIdByInn());
-    Assert.assertNotNull(hazelcastMockServer.getCashOrderById());
+    Assert.assertNotNull(hazelcastMockServer.getCashOrdersByDate());
     hazelcastMockServer.destroy();
   }
 

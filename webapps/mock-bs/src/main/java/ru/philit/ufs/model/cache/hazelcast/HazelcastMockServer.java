@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,7 @@ public class HazelcastMockServer {
   @Getter
   private IMap<Long, Map<Long, String>> tasksCheckbookIssuingByPackageId;
   @Getter
-  private IMap<String, SrvCreateCashOrderRs> cashOrderById;
+  private IMap<XMLGregorianCalendar, Map<String, SrvCreateCashOrderRs>> cashOrdersByDate;
 
   /**
    * Статусы операций, для быстрого доступа.
@@ -113,7 +114,7 @@ public class HazelcastMockServer {
     taskStatuses = instance.getMap("taskStatuses");
     packageById = instance.getMap("packageById");
     packageIdByInn = instance.getMap("packageIdByInn");
-    cashOrderById = instance.getMap("cashOrders");
+    cashOrdersByDate = instance.getMap("cashOrders");
   }
 
   /**

@@ -7,9 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.IMap;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -19,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -184,20 +180,23 @@ public class HazelcastMockCacheImpl implements MockCache {
 
   @Override
   public void saveCashOrder(SrvCreateCashOrderRs cashOrder) {
-    hazelcastServer.getCashOrderById()
-        .put(cashOrder.getSrvCreateCashOrderRsMessage().getCashOrderId(), cashOrder);
+    XMLGregorianCalendar date = cashOrder.getSrvCreateCashOrderRsMessage().getCreatedDttm();
+    hazelcastServer.getCashOrdersByDate().putIfAbsent(date, new HashMap<>());
+    Map<String, SrvCreateCashOrderRs> innerMap = hazelcastServer.getCashOrdersByDate().get(date);
+    innerMap.put(cashOrder.getSrvCreateCashOrderRsMessage().getCashOrderId(), cashOrder);
+    hazelcastServer.getCashOrdersByDate().put(date, innerMap);
   }
 
   @Override
   public List<SrvCreateCashOrderRs> getCashOrders(XMLGregorianCalendar from,
       XMLGregorianCalendar to) {
-    return hazelcastServer.getCashOrderById().values()
-        .stream()
-        .filter(cashOrder ->
-            cashOrder.getSrvCreateCashOrderRsMessage().getCreatedDttm().toGregorianCalendar()
-                .after(from.toGregorianCalendar())
-                && cashOrder.getSrvCreateCashOrderRsMessage().getCreatedDttm().toGregorianCalendar()
-                .before(to.toGregorianCalendar()))
+    return hazelcastServer.getCashOrdersByDate()
+        .entrySet().stream()
+        .filter(pair -> pair.getKey().toGregorianCalendar().after(from.toGregorianCalendar())
+            && pair.getKey().toGregorianCalendar().before(to.toGregorianCalendar()))
+        .map(Entry::getValue)
+        .map(Map::values)
+        .flatMap(Collection::stream)
         .collect(Collectors.toList());
   }
 
@@ -205,11 +204,18 @@ public class HazelcastMockCacheImpl implements MockCache {
   public SrvUpdStCashOrderRs updateCashOrder(SrvUpdStCashOrderRq request) {
     SrvUpdStCashOrderRs updatedCashOrder = new SrvUpdStCashOrderRs();
     updatedCashOrder.setSrvUpdCashOrderRsMessage(new SrvUpdCashOrderRsMessage());
-    Optional<String> optionalId = hazelcastServer.getCashOrderById().keySet().stream()
-        .filter(request.getSrvUpdCashOrderRqMessage().getCashOrderId()::equals).findFirst();
-    if (optionalId.isPresent()) {
-      SrvCreateCashOrderRs cashOrderFromCache = hazelcastServer.getCashOrderById()
-          .get(optionalId.get());
+    String requestCashOrderId = request.getSrvUpdCashOrderRqMessage().getCashOrderId();
+
+    XMLGregorianCalendar date = hazelcastServer.getCashOrdersByDate().entrySet().stream()
+        .filter(pair -> pair.getValue().keySet().stream()
+            .anyMatch(innerV -> innerV.equals(requestCashOrderId)))
+        .map(Entry::getKey)
+        .findFirst()
+        .orElse(null);
+
+    if (date != null) {
+      SrvCreateCashOrderRs cashOrderFromCache = hazelcastServer.getCashOrdersByDate()
+          .get(date).get(requestCashOrderId);
       cashOrderFromCache.getSrvCreateCashOrderRsMessage()
           .setCashOrderStatus(request.getSrvUpdCashOrderRqMessage()
               .getCashOrderStatus());
@@ -238,12 +244,9 @@ public class HazelcastMockCacheImpl implements MockCache {
   @Override
   public Boolean checkOverLimit(String userLogin, BigDecimal amount,
       XMLGregorianCalendar requestDate) {
-    BigDecimal result = hazelcastServer.getCashOrderById().values().stream()
+    BigDecimal result = hazelcastServer.getCashOrdersByDate().get(requestDate).values().stream()
         .filter(cashOrder -> userLogin.equals(
             cashOrder.getSrvCreateCashOrderRsMessage().getUserLogin()))
-        .filter(cashOrder -> format(requestDate.toGregorianCalendar().getTime()).equals(format(
-            cashOrder.getSrvCreateCashOrderRsMessage().getCreatedDttm().toGregorianCalendar()
-                .getTime())))
         .map(cashOrderRs -> cashOrderRs.getSrvCreateCashOrderRsMessage().getAmount())
         .reduce(BigDecimal::add)
         .orElse(BigDecimal.valueOf(0));
@@ -285,16 +288,5 @@ public class HazelcastMockCacheImpl implements MockCache {
     c.set(Calendar.SECOND, c.getActualMinimum(Calendar.SECOND));
     c.set(Calendar.MILLISECOND, c.getActualMinimum(Calendar.MILLISECOND));
     return c.getTime();
-  }
-
-  private static Date format(Date date) {
-    DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-    Date resultDate = null;
-    try {
-      resultDate = formatter.parse(formatter.format(date));
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-    return resultDate;
   }
 }

@@ -54,7 +54,8 @@ public class HazelcastMockCacheImplTest {
   private IMap<Long, PkgTaskStatusType> taskStatuses = new MockIMap<>();
   private IMap<Long, OperationPackageInfo> packageById = new MockIMap<>();
   private IMap<String, Long> packageIdByInn = new MockIMap<>();
-  private IMap<String, SrvCreateCashOrderRs> cashOrderById = new MockIMap<>();
+  private IMap<XMLGregorianCalendar, Map<String, SrvCreateCashOrderRs>> cashOrdersByDate =
+      new MockIMap<>();
 
   /**
    * Set up test data.
@@ -76,7 +77,7 @@ public class HazelcastMockCacheImplTest {
     when(hazelcastMockServer.getTaskStatuses()).thenReturn(taskStatuses);
     when(hazelcastMockServer.getPackageById()).thenReturn(packageById);
     when(hazelcastMockServer.getPackageIdByInn()).thenReturn(packageIdByInn);
-    when(hazelcastMockServer.getCashOrderById()).thenReturn(cashOrderById);
+    when(hazelcastMockServer.getCashOrdersByDate()).thenReturn(cashOrdersByDate);
   }
 
   @Test
@@ -171,14 +172,18 @@ public class HazelcastMockCacheImplTest {
     SrvCreateCashOrderRs cashOrder = new SrvCreateCashOrderRs();
     cashOrder.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRsMessage());
     cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderId("1");
+    cashOrder.getSrvCreateCashOrderRsMessage().setCreatedDttm(xmlCalendar(2022, 3, 3));
     mockCache.saveCashOrder(cashOrder);
+    XMLGregorianCalendar date = cashOrder.getSrvCreateCashOrderRsMessage().getCreatedDttm();
     //then
-    Assert.assertTrue(cashOrderById.containsKey("1"));
-    Assert.assertEquals(cashOrderById.get("1"), cashOrder);
+    Assert.assertEquals(cashOrdersByDate.size(), 1);
+    Assert.assertTrue(cashOrdersByDate.containsKey(date));
+    Assert.assertTrue(cashOrdersByDate.get(date).containsKey("1"));
+    Assert.assertEquals(cashOrdersByDate.get(date).get("1"), cashOrder);
   }
 
   @Test
-  public void testGetCashOrders() throws DatatypeConfigurationException {
+  public void testGetCashOrders() {
     // when
     SrvCreateCashOrderRs cashOrder = new SrvCreateCashOrderRs();
     cashOrder.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRsMessage());
@@ -210,6 +215,7 @@ public class HazelcastMockCacheImplTest {
     cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderStatus(CashOrderStatusType.COMMITTED);
     cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderType(CashOrderType.KO_1);
     cashOrder.getSrvCreateCashOrderRsMessage().setCashOrderINum("111");
+    cashOrder.getSrvCreateCashOrderRsMessage().setCreatedDttm(xmlCalendar(2022, Calendar.MARCH, 8));
     mockCache.saveCashOrder(cashOrder);
     SrvUpdStCashOrderRq request = new SrvUpdStCashOrderRq();
     request.setSrvUpdCashOrderRqMessage(new SrvUpdCashOrderRqMessage());
