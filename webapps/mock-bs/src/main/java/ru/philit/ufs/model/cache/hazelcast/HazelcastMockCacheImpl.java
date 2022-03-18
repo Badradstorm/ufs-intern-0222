@@ -190,11 +190,12 @@ public class HazelcastMockCacheImpl implements MockCache {
   @Override
   public List<SrvCreateCashOrderRs> getCashOrders(XMLGregorianCalendar from,
       XMLGregorianCalendar to) {
-    return hazelcastServer.getCashOrdersByDate()
-        .entrySet().stream()
-        .filter(pair -> pair.getKey().toGregorianCalendar().after(from.toGregorianCalendar())
-            && pair.getKey().toGregorianCalendar().before(to.toGregorianCalendar()))
-        .map(Entry::getValue)
+    List<XMLGregorianCalendar> dates = hazelcastServer.getCashOrdersByDate().keySet().stream()
+        .filter(date -> date.toGregorianCalendar().after(from.toGregorianCalendar())
+            && date.toGregorianCalendar().before(to.toGregorianCalendar()))
+        .collect(Collectors.toList());
+    return dates.stream()
+        .map(date -> hazelcastServer.getCashOrdersByDate().get(date))
         .map(Map::values)
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
