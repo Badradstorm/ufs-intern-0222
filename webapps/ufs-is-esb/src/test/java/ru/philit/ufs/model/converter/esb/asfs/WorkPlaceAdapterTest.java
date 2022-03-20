@@ -49,7 +49,7 @@ public class WorkPlaceAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testRequestById() {
-    SrvGetWorkPlaceInfoRq request = WorkPlaceAdapter.requestById(WORKPLACE_UID);
+    SrvGetWorkPlaceInfoRq request = WorkPlaceMapstructAdapter.requestById(WORKPLACE_UID);
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertNotNull(request.getSrvGetWorkPlaceInfoRqMessage());
     Assert.assertEquals(request.getSrvGetWorkPlaceInfoRqMessage().getWorkPlaceUId(), WORKPLACE_UID);
@@ -57,7 +57,7 @@ public class WorkPlaceAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testConvertSrvGetWorkPlaceInfoRs() {
-    Workplace workplace = WorkPlaceAdapter.convert(response);
+    Workplace workplace = WorkPlaceMapstructAdapter.convert(response);
 
     assertHeaderInfo(workplace);
     Assert.assertEquals(workplace.getType().code(), 0);
