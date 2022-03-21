@@ -12,7 +12,7 @@ import ru.philit.ufs.esb.ReceiveMessageListener;
 import ru.philit.ufs.esb.client.EsbClient;
 import ru.philit.ufs.model.cache.IsEsbCache;
 import ru.philit.ufs.model.converter.esb.JaxbConverter;
-import ru.philit.ufs.model.converter.esb.asfs.CashOrderAdapter;
+import ru.philit.ufs.model.converter.esb.asfs.CashOrderMapstructAdapter;
 import ru.philit.ufs.model.converter.esb.asfs.WorkPlaceAdapter;
 import ru.philit.ufs.model.converter.esb.eks.AccountAdapter;
 import ru.philit.ufs.model.converter.esb.eks.CheckFraudAdapter;
@@ -348,7 +348,7 @@ public class EsbServiceImpl
 
         case RequestType.CREATE_CASH_ORDER:
           if (isCashOrder(entityRequest)) {
-            SrvCreateCashOrderRq request = CashOrderAdapter.toRequestCreate(
+            SrvCreateCashOrderRq request = CashOrderMapstructAdapter.toRequestCreate(
                 (CashOrder) entityRequest.getRequestData());
             isEsbCache.putRequest(request.getHeaderInfo().getRqUID(), entityRequest);
             esbClient.sendMessage(asfsConverter.getXml(request));
@@ -357,7 +357,7 @@ public class EsbServiceImpl
 
         case RequestType.UPDATE_CASH_ORDER:
           if (isCashOrder(entityRequest)) {
-            SrvUpdStCashOrderRq request = CashOrderAdapter.toRequestUpdate(
+            SrvUpdStCashOrderRq request = CashOrderMapstructAdapter.toRequestUpdate(
                 (CashOrder) entityRequest.getRequestData());
             isEsbCache.putRequest(request.getHeaderInfo().getRqUID(), entityRequest);
             esbClient.sendMessage(asfsConverter.getXml(request));
@@ -366,7 +366,7 @@ public class EsbServiceImpl
 
         case RequestType.CASH_ORDER_FROM_DATE_TO_DATE:
           if (isCashOrderRequest(entityRequest)) {
-            SrvGetCashOrderRq request = CashOrderAdapter.toRequestGet(
+            SrvGetCashOrderRq request = CashOrderMapstructAdapter.toRequestGet(
                 (CashOrderRequest) entityRequest.getRequestData());
             isEsbCache.putRequest(request.getHeaderInfo().getRqUID(), entityRequest);
             esbClient.sendMessage(asfsConverter.getXml(request));
@@ -375,7 +375,7 @@ public class EsbServiceImpl
 
         case RequestType.CHECK_OVER_LIMIT:
           if (isCashOrder(entityRequest)) {
-            SrvCheckOverLimitRq request = CashOrderAdapter.toRequestCheckOverLimit(
+            SrvCheckOverLimitRq request = CashOrderMapstructAdapter.toRequestCheckOverLimit(
                 (CashOrder) entityRequest.getRequestData());
             isEsbCache.putRequest(request.getHeaderInfo().getRqUID(), entityRequest);
             esbClient.sendMessage(asfsConverter.getXml(request));

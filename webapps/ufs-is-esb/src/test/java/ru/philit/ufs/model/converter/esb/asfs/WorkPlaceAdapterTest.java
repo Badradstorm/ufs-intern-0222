@@ -49,6 +49,14 @@ public class WorkPlaceAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testRequestById() {
+    SrvGetWorkPlaceInfoRq request = WorkPlaceAdapter.requestById(WORKPLACE_UID);
+    assertHeaderInfo(request.getHeaderInfo());
+    Assert.assertNotNull(request.getSrvGetWorkPlaceInfoRqMessage());
+    Assert.assertEquals(request.getSrvGetWorkPlaceInfoRqMessage().getWorkPlaceUId(), WORKPLACE_UID);
+  }
+
+  @Test
+  public void testRequestByIdMapstruct() {
     SrvGetWorkPlaceInfoRq request = WorkPlaceMapstructAdapter.requestById(WORKPLACE_UID);
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertNotNull(request.getSrvGetWorkPlaceInfoRqMessage());
@@ -57,6 +65,26 @@ public class WorkPlaceAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testConvertSrvGetWorkPlaceInfoRs() {
+    Workplace workplace = WorkPlaceAdapter.convert(response);
+
+    assertHeaderInfo(workplace);
+    Assert.assertEquals(workplace.getType().code(), 0);
+    Assert.assertTrue(workplace.isCashboxOnBoard());
+    Assert.assertEquals(workplace.getSubbranchCode(), "123");
+    Assert.assertEquals(workplace.getCashboxDeviceId(), "333");
+    Assert.assertEquals(workplace.getCashboxDeviceType(), "dev");
+    Assert.assertEquals(workplace.getCurrencyType(), "rub");
+    Assert.assertEquals(workplace.getAmount(), BigDecimal.valueOf(2.000));
+    Assert.assertEquals(workplace.getLimit(), BigDecimal.valueOf(3.000));
+
+    List<OperationTypeLimit> categoryLimits = workplace.getCategoryLimits();
+    Assert.assertEquals(categoryLimits.size(), 1);
+    Assert.assertEquals(categoryLimits.get(0).getCategoryId(), BigInteger.valueOf(1).toString());
+    Assert.assertEquals(categoryLimits.get(0).getLimit(), BigDecimal.valueOf(2.000));
+  }
+
+  @Test
+  public void testConvertSrvGetWorkPlaceInfoRsMapstruct() {
     Workplace workplace = WorkPlaceMapstructAdapter.convert(response);
 
     assertHeaderInfo(workplace);
