@@ -156,7 +156,8 @@ public class CashOrderAdapter extends AsfsAdapter {
   }
 
   private static AdditionalInfo.CashSymbols.CashSymbolItem convert(CashSymbol cashSymbol) {
-    AdditionalInfo.CashSymbols.CashSymbolItem cashSymbolItem = new AdditionalInfo.CashSymbols.CashSymbolItem();
+    AdditionalInfo.CashSymbols.CashSymbolItem cashSymbolItem =
+        new AdditionalInfo.CashSymbols.CashSymbolItem();
     cashSymbolItem.setCashSymbol(cashSymbol.getCode());
     cashSymbolItem.setCashSymbolAmount(cashSymbol.getAmount());
     return cashSymbolItem;
@@ -200,7 +201,8 @@ public class CashOrderAdapter extends AsfsAdapter {
     return identityDocumentType;
   }
 
-  private static IDDtype convert(ru.philit.ufs.model.entity.account.IdentityDocumentType identityDocumentType) {
+  private static IDDtype convert(
+      ru.philit.ufs.model.entity.account.IdentityDocumentType identityDocumentType) {
     switch (identityDocumentType.code()) {
       case "passport":
         return IDDtype.PASSPORT;
@@ -274,38 +276,58 @@ public class CashOrderAdapter extends AsfsAdapter {
     request.setHeaderInfo(headerInfo());
     request.setSrvCreateCashOrderRqMessage(new SrvCreateCashOrderRqMessage());
     request.getSrvCreateCashOrderRqMessage().setCashOrderId(cashOrder.getCashOrderId());
-    request.getSrvCreateCashOrderRqMessage().setOperationType(convert(cashOrder.getOperationType()));
+    request.getSrvCreateCashOrderRqMessage()
+        .setOperationType(convert(cashOrder.getOperationType()));
     request.getSrvCreateCashOrderRqMessage().setCashOrderINum(cashOrder.getCashOrderINum());
     request.getSrvCreateCashOrderRqMessage().setAccountId(cashOrder.getAccountId());
     request.getSrvCreateCashOrderRqMessage().setAmount(cashOrder.getAmount());
     request.getSrvCreateCashOrderRqMessage().setAmountInWords(cashOrder.getAmountInWords());
     request.getSrvCreateCashOrderRqMessage().setCurrencyType(cashOrder.getCurrencyType());
-    request.getSrvCreateCashOrderRqMessage().setCashOrderStatus(convert(cashOrder.getCashOrderStatus()));
-    request.getSrvCreateCashOrderRqMessage().setWorkPlaceUId(cashOrder.getOperator().getWorkplaceId());
+    request.getSrvCreateCashOrderRqMessage()
+        .setCashOrderStatus(convert(cashOrder.getCashOrderStatus()));
+    request.getSrvCreateCashOrderRqMessage()
+        .setWorkPlaceUId(cashOrder.getOperator().getWorkplaceId());
     request.getSrvCreateCashOrderRqMessage().setRepData(new RepData());
-    request.getSrvCreateCashOrderRqMessage().getRepData().setRepID(cashOrder.getRepresentative().getId());
-    request.getSrvCreateCashOrderRqMessage().getRepData().setRepFIO(cashOrder.getRepresentative().getRepFio());
-    request.getSrvCreateCashOrderRqMessage().getRepData().setAddress(cashOrder.getRepresentative().getAddress());
-    request.getSrvCreateCashOrderRqMessage().getRepData().setDateOfBirth(xmlCalendar(cashOrder.getRepresentative().getBirthDate()));
+    request.getSrvCreateCashOrderRqMessage().getRepData()
+        .setRepID(cashOrder.getRepresentative().getId());
+    request.getSrvCreateCashOrderRqMessage().getRepData()
+        .setRepFIO(cashOrder.getRepresentative().getRepFio());
+    request.getSrvCreateCashOrderRqMessage().getRepData()
+        .setAddress(cashOrder.getRepresentative().getAddress());
+    request.getSrvCreateCashOrderRqMessage().getRepData()
+        .setDateOfBirth(xmlCalendar(cashOrder.getRepresentative().getBirthDate()));
     for (IdentityDocument document : cashOrder.getRepresentative().getIdentityDocuments()) {
-      request.getSrvCreateCashOrderRqMessage().getRepData().getIdentityDocumentType().add(convert(document));
+      request.getSrvCreateCashOrderRqMessage().getRepData().getIdentityDocumentType()
+          .add(convert(document));
     }
-    request.getSrvCreateCashOrderRqMessage().getRepData().setPlaceOfBirth(cashOrder.getRepresentative().getPlaceOfBirth());
-    request.getSrvCreateCashOrderRqMessage().getRepData().setResident(cashOrder.getRepresentative().isResident());
-    request.getSrvCreateCashOrderRqMessage().getRepData().setINN(cashOrder.getRepresentative().getInn());
+    request.getSrvCreateCashOrderRqMessage().getRepData()
+        .setPlaceOfBirth(cashOrder.getRepresentative().getPlaceOfBirth());
+    request.getSrvCreateCashOrderRqMessage().getRepData()
+        .setResident(cashOrder.getRepresentative().isResident());
+    request.getSrvCreateCashOrderRqMessage().getRepData()
+        .setINN(cashOrder.getRepresentative().getInn());
     request.getSrvCreateCashOrderRqMessage().setAdditionalInfo(new AdditionalInfo());
     request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().setComment(cashOrder.getComment());
-    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().setCashSymbols(new AdditionalInfo.CashSymbols());
+    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo()
+        .setCashSymbols(new AdditionalInfo.CashSymbols());
     for (CashSymbol cashSymbol : cashOrder.getCashSymbols()) {
-      request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().getCashSymbols().getCashSymbolItem().add(convert(cashSymbol));
+      request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().getCashSymbols()
+          .getCashSymbolItem().add(convert(cashSymbol));
     }
-    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().setSubbranchCode(cashOrder.getOperator().getSubbranch().getSubbranchCode());
-    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().setVSPCode(cashOrder.getOperator().getSubbranch().getVspCode());
-    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().setOSBCode(cashOrder.getOperator().getSubbranch().getOsbCode());
-    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().setGOSBCode(cashOrder.getOperator().getSubbranch().getGosbCode());
-    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().setTBCode(cashOrder.getOperator().getSubbranch().getTbCode());
-    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().setAccount20202Num(cashOrder.getAccount20202Num());
-    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo().setUserLogin(cashOrder.getUserLogin());
+    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo()
+        .setSubbranchCode(cashOrder.getOperator().getSubbranch().getSubbranchCode());
+    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo()
+        .setVSPCode(cashOrder.getOperator().getSubbranch().getVspCode());
+    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo()
+        .setOSBCode(cashOrder.getOperator().getSubbranch().getOsbCode());
+    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo()
+        .setGOSBCode(cashOrder.getOperator().getSubbranch().getGosbCode());
+    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo()
+        .setTBCode(cashOrder.getOperator().getSubbranch().getTbCode());
+    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo()
+        .setAccount20202Num(cashOrder.getAccount20202Num());
+    request.getSrvCreateCashOrderRqMessage().getAdditionalInfo()
+        .setUserLogin(cashOrder.getUserLogin());
     return request;
   }
 
@@ -316,8 +338,10 @@ public class CashOrderAdapter extends AsfsAdapter {
     SrvGetCashOrderRq request = new SrvGetCashOrderRq();
     request.setHeaderInfo(headerInfo());
     request.setSrvGetCashOrderRqMessage(new SrvGetCashOrderRqMessage());
-    request.getSrvGetCashOrderRqMessage().setCreatedFrom(xmlCalendar(cashOrderRequest.getCreatedFrom()));
-    request.getSrvGetCashOrderRqMessage().setCreatedTo(xmlCalendar(cashOrderRequest.getCreatedTo()));
+    request.getSrvGetCashOrderRqMessage()
+        .setCreatedFrom(xmlCalendar(cashOrderRequest.getCreatedFrom()));
+    request.getSrvGetCashOrderRqMessage()
+        .setCreatedTo(xmlCalendar(cashOrderRequest.getCreatedTo()));
     return request;
   }
 
@@ -328,7 +352,8 @@ public class CashOrderAdapter extends AsfsAdapter {
     SrvUpdStCashOrderRq request = new SrvUpdStCashOrderRq();
     request.setHeaderInfo(headerInfo());
     request.setSrvUpdCashOrderRqMessage(new SrvUpdCashOrderRqMessage());
-    request.getSrvUpdCashOrderRqMessage().setCashOrderStatus(convert(cashOrder.getCashOrderStatus()));
+    request.getSrvUpdCashOrderRqMessage()
+        .setCashOrderStatus(convert(cashOrder.getCashOrderStatus()));
     request.getSrvUpdCashOrderRqMessage().setCashOrderId(cashOrder.getCashOrderId());
     return request;
   }

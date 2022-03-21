@@ -145,7 +145,8 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testRequestCreateMapstruct() {
-    SrvCreateCashOrderRq request = CashOrderMapstructAdapter.toRequestCreate(testData.getCashOrder());
+    SrvCreateCashOrderRq request = CashOrderMapstructAdapter.toRequestCreate(
+        testData.getCashOrder());
     testRequestCreateAnyAdapter(request);
   }
 
@@ -188,7 +189,8 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testRequestUpdateMapstruct() {
-    SrvUpdStCashOrderRq request = CashOrderMapstructAdapter.toRequestUpdate(testData.getCashOrder());
+    SrvUpdStCashOrderRq request = CashOrderMapstructAdapter.toRequestUpdate(
+        testData.getCashOrder());
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertNotNull(request.getSrvUpdCashOrderRqMessage());
     Assert.assertEquals(request.getSrvUpdCashOrderRqMessage().getCashOrderId(),
@@ -208,7 +210,8 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testRequestCheckOverLimitMapstruct() {
-    SrvCheckOverLimitRq request = CashOrderMapstructAdapter.toRequestCheckOverLimit(testData.getCashOrder());
+    SrvCheckOverLimitRq request = CashOrderMapstructAdapter.toRequestCheckOverLimit(
+        testData.getCashOrder());
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getAmount(), TestData.AMOUNT);
     Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getUserLogin(),

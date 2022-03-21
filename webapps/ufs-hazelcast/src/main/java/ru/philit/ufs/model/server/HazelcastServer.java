@@ -219,7 +219,7 @@ public class HazelcastServer {
   @Getter
   private IMap<LocalKey<CashOrderRequest>, List<CashOrder>> cashOrderFromDateToDateMap;
   @Getter
-  private IMap<LocalKey<String>, ExternalEntityContainer<Boolean>> checkOverLimitMap;
+  private IMap<LocalKey<CashOrder>, ExternalEntityContainer<Boolean>> checkOverLimitMap;
   @Getter
   private IMap<LocalKey<String>, Workplace> workPlaceByIdMap;
 

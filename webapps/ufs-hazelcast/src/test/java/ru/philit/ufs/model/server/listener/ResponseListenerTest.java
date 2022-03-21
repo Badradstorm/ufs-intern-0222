@@ -111,7 +111,7 @@ public class ResponseListenerTest {
   private final IMap<LocalKey<CashOrder>, CashOrder> cashOrderResponseMap = new MockIMap<>();
   private final IMap<LocalKey<CashOrderRequest>, List<CashOrder>> cashOrderFromDateToDateMap =
       new MockIMap<>();
-  private final IMap<LocalKey<String>, ExternalEntityContainer<Boolean>> checkOverLimitMap =
+  private final IMap<LocalKey<CashOrder>, ExternalEntityContainer<Boolean>> checkOverLimitMap =
       new MockIMap<>();
   private final IMap<LocalKey<String>, Workplace> workPlaceByIdMap = new MockIMap<>();
 
@@ -1355,7 +1355,9 @@ public class ResponseListenerTest {
   @Test
   public void testItemAdded_CheckOverLimit() throws Exception {
     // given
-    String checkOverLimitRequest = BigDecimal.valueOf(300).toString();
+    CashOrder checkOverLimitRequest = new CashOrder();
+    checkOverLimitRequest.setAmount(BigDecimal.valueOf(300));
+    checkOverLimitRequest.setUserLogin("USER");
     ExternalEntityRequest request = new ExternalEntityRequest();
     request.setSessionId(SESSION_ID);
     request.setEntityType(RequestType.CHECK_OVER_LIMIT);
@@ -1369,7 +1371,7 @@ public class ResponseListenerTest {
     responseQueue.add(container);
     // then
     Assert.assertTrue(responseFlagMap.containsKey(request));
-    LocalKey<String> localKey = new LocalKey<>(SESSION_ID, checkOverLimitRequest);
+    LocalKey<CashOrder> localKey = new LocalKey<>(SESSION_ID, checkOverLimitRequest);
     Assert.assertTrue(checkOverLimitMap.containsKey(localKey));
     Assert.assertEquals(checkOverLimitMap.get(localKey), container);
   }
