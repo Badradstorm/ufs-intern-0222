@@ -21,6 +21,7 @@ import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs.SrvUpdCashOrderRsMessage;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderRequest;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 
 /**
  * Преобразователь между сущностью CashOrder и соответствующим транспортным объектом.
@@ -110,9 +111,10 @@ public class CashOrderMapstructAdapter extends AsfsAdapter {
   /**
    * Возвращает объект запроса обновления статуса кассового ордера.
    */
-  public static SrvCheckOverLimitRq toRequestCheckOverLimit(CashOrder cashOrder) {
+  public static SrvCheckOverLimitRq toCheckOverLimitRequest(
+      CheckOverLimitRequest checkOverLimitRequest) {
     SrvCheckOverLimitRq request = new SrvCheckOverLimitRq();
-    SrvCheckOverLimitRqMessage message = mapper.toCheckOverLimitRqMessage(cashOrder);
+    SrvCheckOverLimitRqMessage message = mapper.toCheckOverLimitRqMessage(checkOverLimitRequest);
     request.setHeaderInfo(headerInfo());
     request.setSrvCheckOverLimitRqMessage(message);
     return request;

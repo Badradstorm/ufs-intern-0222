@@ -41,6 +41,7 @@ import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderRequest;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 import ru.philit.ufs.model.entity.request.RequestType;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.Workplace;
@@ -111,7 +112,7 @@ public class ResponseListenerTest {
   private final IMap<LocalKey<CashOrder>, CashOrder> cashOrderResponseMap = new MockIMap<>();
   private final IMap<LocalKey<CashOrderRequest>, List<CashOrder>> cashOrderFromDateToDateMap =
       new MockIMap<>();
-  private final IMap<LocalKey<CashOrder>, ExternalEntityContainer<Boolean>> checkOverLimitMap =
+  private final IMap<LocalKey<CheckOverLimitRequest>, ExternalEntityContainer<Boolean>> checkOverLimitMap =
       new MockIMap<>();
   private final IMap<LocalKey<String>, Workplace> workPlaceByIdMap = new MockIMap<>();
 
@@ -1355,7 +1356,7 @@ public class ResponseListenerTest {
   @Test
   public void testItemAdded_CheckOverLimit() throws Exception {
     // given
-    CashOrder checkOverLimitRequest = new CashOrder();
+    CheckOverLimitRequest checkOverLimitRequest = new CheckOverLimitRequest();
     checkOverLimitRequest.setAmount(BigDecimal.valueOf(300));
     checkOverLimitRequest.setUserLogin("USER");
     ExternalEntityRequest request = new ExternalEntityRequest();
@@ -1371,7 +1372,7 @@ public class ResponseListenerTest {
     responseQueue.add(container);
     // then
     Assert.assertTrue(responseFlagMap.containsKey(request));
-    LocalKey<CashOrder> localKey = new LocalKey<>(SESSION_ID, checkOverLimitRequest);
+    LocalKey<CheckOverLimitRequest> localKey = new LocalKey<>(SESSION_ID, checkOverLimitRequest);
     Assert.assertTrue(checkOverLimitMap.containsKey(localKey));
     Assert.assertEquals(checkOverLimitMap.get(localKey), container);
   }

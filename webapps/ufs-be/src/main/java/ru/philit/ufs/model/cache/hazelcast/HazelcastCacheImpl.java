@@ -65,6 +65,7 @@ import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderRequest;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.User;
@@ -301,12 +302,9 @@ public class HazelcastCacheImpl
   }
 
   @Override
-  public boolean checkOverLimit(BigDecimal amount, ClientInfo clientInfo) {
-    CashOrder cashOrderCheckLimit = new CashOrder();
-    cashOrderCheckLimit.setAmount(amount);
-    cashOrderCheckLimit.setUserLogin(clientInfo.getUser().getLogin());
+  public boolean checkOverLimit(CheckOverLimitRequest checkOverLimitRequest, ClientInfo clientInfo) {
     ExternalEntityContainer<Boolean> container = requestDataFromExternal(
-        cashOrderCheckLimit, client.getCheckOverLimitMap(), CHECK_OVER_LIMIT, clientInfo);
+        checkOverLimitRequest, client.getCheckOverLimitMap(), CHECK_OVER_LIMIT, clientInfo);
     return container.getData();
   }
 

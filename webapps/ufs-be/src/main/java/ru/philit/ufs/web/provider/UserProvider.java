@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.cache.UserCache;
 import ru.philit.ufs.model.cache.WorkplaceCache;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.SessionUser;
@@ -119,7 +120,10 @@ public class UserProvider {
     if (workplace.getAmount() == null) {
       throw new InvalidDataException("Отсутствует общий остаток по кассе");
     }
-    if (!workplaceCache.checkOverLimit(workplace.getAmount(), clientInfo)) {
+    CheckOverLimitRequest checkOverLimitRequest = new CheckOverLimitRequest();
+    checkOverLimitRequest.setAmount(workplace.getAmount());
+    checkOverLimitRequest.setUserLogin(clientInfo.getUser().getLogin());
+    if (!workplaceCache.checkOverLimit(checkOverLimitRequest, clientInfo)) {
       throw new InvalidDataException("Превышен лимит общего остатка по кассе");
     }
     return workplace;
@@ -140,7 +144,10 @@ public class UserProvider {
     if (workplace.getAmount() == null) {
       throw new InvalidDataException("Отсутствует общий остаток по кассе");
     }
-    if (!workplaceCache.checkOverLimit(amount.add(workplace.getAmount()), clientInfo)) {
+    CheckOverLimitRequest checkOverLimitRequest = new CheckOverLimitRequest();
+    checkOverLimitRequest.setAmount(workplace.getAmount());
+    checkOverLimitRequest.setUserLogin(clientInfo.getUser().getLogin());
+    if (!workplaceCache.checkOverLimit(checkOverLimitRequest, clientInfo)) {
       throw new InvalidDataException("Превышен лимит общего остатка по кассе");
     }
   }

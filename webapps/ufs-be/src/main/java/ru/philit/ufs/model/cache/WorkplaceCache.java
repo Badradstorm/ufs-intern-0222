@@ -1,6 +1,6 @@
 package ru.philit.ufs.model.cache;
 
-import java.math.BigDecimal;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Workplace;
 
@@ -9,7 +9,7 @@ import ru.philit.ufs.model.entity.user.Workplace;
  */
 public interface WorkplaceCache {
 
-  boolean checkOverLimit(BigDecimal amount, ClientInfo clientInfo);
+  boolean checkOverLimit(CheckOverLimitRequest checkOverLimitRequest, ClientInfo clientInfo);
 
   Workplace getWorkplace(String workplaceId, ClientInfo clientInfo);
 }

@@ -210,8 +210,8 @@ public class CashOrderAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testRequestCheckOverLimitMapstruct() {
-    SrvCheckOverLimitRq request = CashOrderMapstructAdapter.toRequestCheckOverLimit(
-        testData.getCashOrder());
+    SrvCheckOverLimitRq request = CashOrderMapstructAdapter.toCheckOverLimitRequest(
+        testData.getCheckOverLimitRequest());
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getAmount(), TestData.AMOUNT);
     Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getUserLogin(),

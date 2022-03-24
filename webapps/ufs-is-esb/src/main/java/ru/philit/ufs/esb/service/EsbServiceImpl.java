@@ -70,6 +70,7 @@ import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderRequest;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 import ru.philit.ufs.model.entity.request.RequestType;
 
 /**
@@ -374,9 +375,9 @@ public class EsbServiceImpl
           break;
 
         case RequestType.CHECK_OVER_LIMIT:
-          if (isCashOrder(entityRequest)) {
-            SrvCheckOverLimitRq request = CashOrderMapstructAdapter.toRequestCheckOverLimit(
-                (CashOrder) entityRequest.getRequestData());
+          if (isCheckOverLimitRequest(entityRequest)) {
+            SrvCheckOverLimitRq request = CashOrderMapstructAdapter.toCheckOverLimitRequest(
+                (CheckOverLimitRequest) entityRequest.getRequestData());
             isEsbCache.putRequest(request.getHeaderInfo().getRqUID(), entityRequest);
             esbClient.sendMessage(asfsConverter.getXml(request));
           }
@@ -460,6 +461,11 @@ public class EsbServiceImpl
   private boolean isCashOrder(ExternalEntityRequest entityRequest) {
     return entityRequest.getRequestData() != null
         && entityRequest.getRequestData() instanceof CashOrder;
+  }
+
+  private boolean isCheckOverLimitRequest(ExternalEntityRequest entityRequest) {
+    return entityRequest.getRequestData() != null
+        && entityRequest.getRequestData() instanceof CheckOverLimitRequest;
   }
 
   /**

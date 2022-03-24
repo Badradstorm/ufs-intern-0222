@@ -47,6 +47,7 @@ import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderRequest;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 import ru.philit.ufs.model.entity.request.RequestType;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
@@ -101,7 +102,7 @@ public class HazelcastCacheImplTest {
   private final IMap<LocalKey<String>, Workplace> workplaceByIdMap = new MockIMap<>();
   private final IMap<LocalKey<CashOrderRequest>, List<CashOrder>> cashOrderFromDateToDateMap =
       new MockIMap<>();
-  private final IMap<LocalKey<CashOrder>, ExternalEntityContainer<Boolean>> checkOverLimitMap =
+  private final IMap<LocalKey<CheckOverLimitRequest>, ExternalEntityContainer<Boolean>> checkOverLimitMap =
       new MockIMap<>();
   private final IMap<LocalKey<CashOrder>, CashOrder> cashOrderResponseMap = new MockIMap<>();
 
@@ -255,7 +256,7 @@ public class HazelcastCacheImplTest {
     assertNotNull(cache.saveCashOrder(new CashOrder(), CLIENT_INFO));
     assertNotNull(cache.getCashOrders(new CashOrderRequest(), CLIENT_INFO));
     assertNotNull(cache.updateCashOrder(new CashOrder(), CLIENT_INFO));
-    assertTrue(cache.checkOverLimit(new BigDecimal(1), CLIENT_INFO));
+    assertTrue(cache.checkOverLimit(new CheckOverLimitRequest(), CLIENT_INFO));
 
     Operation operation = new Operation();
     operation.setId(OPERATION_ID);

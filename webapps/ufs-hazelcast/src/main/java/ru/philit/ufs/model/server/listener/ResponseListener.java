@@ -33,6 +33,7 @@ import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderRequest;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 import ru.philit.ufs.model.entity.request.RequestType;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.Workplace;
@@ -328,7 +329,7 @@ public class ResponseListener
       case RequestType.CHECK_OVER_LIMIT:
         if (entity instanceof ExternalEntityContainer) {
           hazelcastServer.getCheckOverLimitMap().put(
-              new LocalKey<>(request.getSessionId(), (CashOrder) request.getRequestData()),
+              new LocalKey<>(request.getSessionId(), (CheckOverLimitRequest) request.getRequestData()),
               (ExternalEntityContainer<Boolean>) entity);
         }
         break;

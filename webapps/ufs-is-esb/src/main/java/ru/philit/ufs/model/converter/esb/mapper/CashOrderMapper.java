@@ -14,6 +14,7 @@ import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq.SrvUpdCashOrderRq
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs.SrvUpdCashOrderRsMessage;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderRequest;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 
 @Mapper(
     uses = {
@@ -46,7 +47,7 @@ public interface CashOrderMapper {
 
   SrvUpdCashOrderRqMessage toUpdStCashOrderRqMessage(CashOrder cashOrder);
 
-  SrvCheckOverLimitRqMessage toCheckOverLimitRqMessage(CashOrder cashOrder);
+  SrvCheckOverLimitRqMessage toCheckOverLimitRqMessage(CheckOverLimitRequest checkOverLimitRequest);
 
   @Mapping(source = "messageDto.cashSymbols.cashSymbolItem", target = "cashSymbols")
   @Mapping(source = "messageDto.INN", target = "representative.inn")

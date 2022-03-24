@@ -81,6 +81,7 @@ import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderRequest;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 import ru.philit.ufs.model.entity.service.AuditEntity;
 import ru.philit.ufs.model.entity.service.LogEntity;
 import ru.philit.ufs.model.entity.user.Operator;
@@ -219,7 +220,7 @@ public class HazelcastServer {
   @Getter
   private IMap<LocalKey<CashOrderRequest>, List<CashOrder>> cashOrderFromDateToDateMap;
   @Getter
-  private IMap<LocalKey<CashOrder>, ExternalEntityContainer<Boolean>> checkOverLimitMap;
+  private IMap<LocalKey<CheckOverLimitRequest>, ExternalEntityContainer<Boolean>> checkOverLimitMap;
   @Getter
   private IMap<LocalKey<String>, Workplace> workPlaceByIdMap;
 

@@ -30,6 +30,7 @@ import ru.philit.ufs.model.entity.esb.eks.SrvAccountByCardNumRs.SrvAccountByCard
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderStatus;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 import ru.philit.ufs.model.entity.request.RequestType;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.Subbranch;
@@ -159,6 +160,8 @@ public class TestData {
   private SrvAccountByCardNumRs accountResponse;
   @Getter
   private CashOrder cashOrder;
+  @Getter
+  private CheckOverLimitRequest checkOverLimitRequest;
   @Getter
   private ExternalEntityList<CashOrder> cashOrders;
 
@@ -301,5 +304,10 @@ public class TestData {
 
     cashOrders = new ExternalEntityList<>();
     cashOrders.getItems().add(cashOrder);
+
+    checkOverLimitRequest = new CheckOverLimitRequest();
+    checkOverLimitRequest.setTobeIncreased(true);
+    checkOverLimitRequest.setUserLogin(USER_LOGIN);
+    checkOverLimitRequest.setAmount(AMOUNT);
   }
 }
