@@ -150,8 +150,8 @@ public class UserProviderTest {
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
     when(workplaceCache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
-    when(workplaceCache.checkOverLimit(any(CheckOverLimitRequest.class), any(ClientInfo.class))).thenReturn(
-        true);
+    when(workplaceCache.checkOverLimit(any(CheckOverLimitRequest.class),
+        any(ClientInfo.class))).thenReturn(true);
     provider.getWorkplace(CLIENT_INFO);
 
     // verify
@@ -223,8 +223,8 @@ public class UserProviderTest {
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
     when(workplaceCache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
-    when(workplaceCache.checkOverLimit(any(CheckOverLimitRequest.class), any(ClientInfo.class))).thenReturn(
-        false);
+    when(workplaceCache.checkOverLimit(any(CheckOverLimitRequest.class),
+        any(ClientInfo.class))).thenReturn(false);
     provider.getWorkplace(CLIENT_INFO);
   }
 
@@ -238,8 +238,8 @@ public class UserProviderTest {
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
     when(workplaceCache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
-    when(workplaceCache.checkOverLimit(any(CheckOverLimitRequest.class), any(ClientInfo.class))).thenReturn(
-        true);
+    when(workplaceCache.checkOverLimit(any(CheckOverLimitRequest.class),
+        any(ClientInfo.class))).thenReturn(true);
     provider.checkWorkplaceIncreasedAmount(AMOUNT, CLIENT_INFO);
 
     // verify

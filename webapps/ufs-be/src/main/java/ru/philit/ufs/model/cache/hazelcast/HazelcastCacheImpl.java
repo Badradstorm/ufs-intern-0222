@@ -297,12 +297,12 @@ public class HazelcastCacheImpl
 
   @Override
   public Workplace getWorkplace(String workplaceId, ClientInfo clientInfo) {
-    return requestDataFromExternal(
-        workplaceId, client.getWorkplaceByIdMap(), WORKPLACE_BY_ID, clientInfo);
+    return requestData(workplaceId, client.getWorkplaceByIdMap(), WORKPLACE_BY_ID, clientInfo);
   }
 
   @Override
-  public boolean checkOverLimit(CheckOverLimitRequest checkOverLimitRequest, ClientInfo clientInfo) {
+  public boolean checkOverLimit(CheckOverLimitRequest checkOverLimitRequest,
+      ClientInfo clientInfo) {
     ExternalEntityContainer<Boolean> container = requestDataFromExternal(
         checkOverLimitRequest, client.getCheckOverLimitMap(), CHECK_OVER_LIMIT, clientInfo);
     return container.getData();

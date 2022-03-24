@@ -36,6 +36,7 @@ import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.order.CashOrder;
 import ru.philit.ufs.model.entity.order.CashOrderRequest;
+import ru.philit.ufs.model.entity.order.CheckOverLimitRequest;
 import ru.philit.ufs.model.entity.request.RequestType;
 
 public class EsbServiceImplTest {
@@ -351,7 +352,7 @@ public class EsbServiceImplTest {
     Assert.assertEquals(putRequests.size(), requestCount);
 
     // given
-    request.setRequestData(new CashOrder());
+    request.setRequestData(new CheckOverLimitRequest());
 
     // when
     request.setEntityType(RequestType.CHECK_OVER_LIMIT);

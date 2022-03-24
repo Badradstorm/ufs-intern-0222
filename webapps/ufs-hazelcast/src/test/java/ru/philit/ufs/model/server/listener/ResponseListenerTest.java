@@ -112,8 +112,8 @@ public class ResponseListenerTest {
   private final IMap<LocalKey<CashOrder>, CashOrder> cashOrderResponseMap = new MockIMap<>();
   private final IMap<LocalKey<CashOrderRequest>, List<CashOrder>> cashOrderFromDateToDateMap =
       new MockIMap<>();
-  private final IMap<LocalKey<CheckOverLimitRequest>, ExternalEntityContainer<Boolean>> checkOverLimitMap =
-      new MockIMap<>();
+  private final IMap<LocalKey<CheckOverLimitRequest>,
+      ExternalEntityContainer<Boolean>> checkOverLimitMap = new MockIMap<>();
   private final IMap<LocalKey<String>, Workplace> workPlaceByIdMap = new MockIMap<>();
 
   @Mock

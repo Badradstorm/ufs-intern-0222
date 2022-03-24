@@ -102,8 +102,8 @@ public class HazelcastCacheImplTest {
   private final IMap<LocalKey<String>, Workplace> workplaceByIdMap = new MockIMap<>();
   private final IMap<LocalKey<CashOrderRequest>, List<CashOrder>> cashOrderFromDateToDateMap =
       new MockIMap<>();
-  private final IMap<LocalKey<CheckOverLimitRequest>, ExternalEntityContainer<Boolean>> checkOverLimitMap =
-      new MockIMap<>();
+  private final IMap<LocalKey<CheckOverLimitRequest>,
+      ExternalEntityContainer<Boolean>> checkOverLimitMap = new MockIMap<>();
   private final IMap<LocalKey<CashOrder>, CashOrder> cashOrderResponseMap = new MockIMap<>();
 
   @Mock
