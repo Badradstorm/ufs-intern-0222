@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -24,15 +25,25 @@ import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationTask;
 import ru.philit.ufs.model.entity.oper.OperationTaskCardDeposit;
 import ru.philit.ufs.model.entity.oper.OperationTaskStatus;
+import ru.philit.ufs.model.entity.order.CashOrder;
+import ru.philit.ufs.model.entity.order.CashOrderRequest;
+import ru.philit.ufs.model.entity.order.CashOrderStatus;
+import ru.philit.ufs.model.entity.order.CashOrderType;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.Subbranch;
 import ru.philit.ufs.model.entity.user.User;
+import ru.philit.ufs.web.dto.CashOrderBookDto;
 import ru.philit.ufs.web.dto.OperationJournalDto;
+import ru.philit.ufs.web.mapping.CashOrderBookMapper;
 import ru.philit.ufs.web.mapping.OperationJournalMapper;
+import ru.philit.ufs.web.mapping.impl.CashOrderBookMapperImpl;
 import ru.philit.ufs.web.mapping.impl.OperationJournalMapperImpl;
+import ru.philit.ufs.web.provider.CashOrderProvider;
 import ru.philit.ufs.web.provider.ReportProvider;
 import ru.philit.ufs.web.provider.RepresentativeProvider;
+import ru.philit.ufs.web.view.GetCashOrderBookReq;
+import ru.philit.ufs.web.view.GetCashOrderBookResp;
 import ru.philit.ufs.web.view.GetOperationJournalReq;
 import ru.philit.ufs.web.view.GetOperationJournalResp;
 
@@ -42,8 +53,12 @@ public class ReportControllerTest extends RestControllerTest {
   private ReportProvider reportProvider;
   @Mock
   private RepresentativeProvider representativeProvider;
+  @Mock
+  private CashOrderProvider cashOrderProvider;
   @Spy
   private OperationJournalMapper operationJournalMapper = new OperationJournalMapperImpl();
+  @Spy
+  private CashOrderBookMapper cashOrderBookMapper = new CashOrderBookMapperImpl();
 
   /**
    * Set up test controller.
@@ -51,8 +66,8 @@ public class ReportControllerTest extends RestControllerTest {
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    standaloneSetup(new ReportController(reportProvider, representativeProvider,
-        operationJournalMapper));
+    standaloneSetup(new ReportController(reportProvider, representativeProvider, cashOrderProvider,
+        operationJournalMapper, cashOrderBookMapper));
   }
 
   @Test
@@ -103,12 +118,41 @@ public class ReportControllerTest extends RestControllerTest {
 
     assertNotNull(response.getData());
     assertTrue(response.getData() instanceof List);
-    assertEquals(((List)response.getData()).size(), 1);
-    assertEquals(((List)response.getData()).get(0).getClass(), OperationJournalDto.class);
-    OperationJournalDto controlDto = (OperationJournalDto) ((List)response.getData()).get(0);
+    assertEquals(((List) response.getData()).size(), 1);
+    assertEquals(((List) response.getData()).get(0).getClass(), OperationJournalDto.class);
+    OperationJournalDto controlDto = (OperationJournalDto) ((List) response.getData()).get(0);
     assertNotNull(controlDto.getOperation());
     //assertEquals(controlDto.getOperation().getAmount(), "1400");
     assertNotNull(controlDto.getRepresentative());
     //assertEquals(controlDto.getRepresentative().getFullName(), "Петров Петр Петрович");
+  }
+
+  @Test
+  public void testGetCashOrderBook() throws Exception {
+    GetCashOrderBookReq request = new GetCashOrderBookReq();
+    request.setFromDate("30.05.2017");
+    request.setToDate("30.06.2017");
+
+    CashOrder cashOrder = new CashOrder();
+    cashOrder.setCashOrderId("1230");
+    cashOrder.setCashOrderStatus(CashOrderStatus.CREATED);
+    cashOrder.setCashOrderType(CashOrderType.KO_1);
+    cashOrder.setAmount(BigDecimal.valueOf(1400));
+    List<CashOrder> cashOrders = Collections.singletonList(cashOrder);
+    when(cashOrderProvider.getCashOrders(any(CashOrderRequest.class), any(ClientInfo.class)))
+        .thenReturn(cashOrders);
+
+    String responseJson = performAndGetContent(post("/report/cashOrderBook")
+        .content(toRequest(request)));
+    GetCashOrderBookResp response = toResponse(responseJson, GetCashOrderBookResp.class);
+
+    assertNotNull(response.getData());
+    assertTrue(response.getData() instanceof List);
+    assertEquals(response.getData().size(), 1);
+    assertEquals(((List) response.getData()).get(0).getClass(), CashOrderBookDto.class);
+    CashOrderBookDto controlDto = (CashOrderBookDto) ((List) response.getData()).get(0);
+    assertNotNull(controlDto.getCashOrderStatus());
+    assertEquals(controlDto.getAmount(), BigDecimal.valueOf(1400));
+    assertNotNull(controlDto.getCashOrderType());
   }
 }
